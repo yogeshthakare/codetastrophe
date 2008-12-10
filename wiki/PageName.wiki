@@ -1,0 +1,10 @@
+#summary About CellFinder
+#labels cellfinder
+
+= About =
+
+CellFinder is a tool for Android cell phones (currently only the T-Mobile G1) that will determine the location and direction of the cellular tower your phone is connected to.
+
+It works by using both of the available location services - *coarse* (network-based) and *fine* (GPS-based). The coarse location is almost always the location of the cell phone tower your phone is connected to, but it can also be a nearby WiFi hotspot. Because the GPS location is much more accurate and can determine your location within a matter of meters (or yards, for you yanks), it's possible to use the difference in locations to pinpoint the location and direction of the cell tower. 
+
+The cell tower location actually comes from Google - there is a web service that the location API in Android will query with the CID and LAC of the tower you're connected to and the service will respond with the latitude and longitude.
