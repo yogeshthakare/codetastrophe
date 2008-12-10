@@ -1,4 +1,4 @@
-#summary About CellFinder
+#summary CellFinder
 #labels cellfinder
 
 = About =
