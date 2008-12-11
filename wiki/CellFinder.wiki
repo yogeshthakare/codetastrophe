@@ -10,7 +10,7 @@ The cell tower location actually comes from Google - there is a web service that
 
 = Known Issues =
 
-  * Accuracy - Becuase the current code uses the Android location API's to get the cell tower location, it may not be accurate. The phone sends information about nearby cell towers and WiFi AP's to a location service on the web, and the response is usually the location of the cell tower you're connected to. Sometimes it is not. I'm working on fixing this though. In the mean time, you can ensure that the location that comes back is more accurately a cell tower by disabling WiFi on your phone.
+  * *Accuracy* - Becuase the current code uses the Android location API's to get the cell tower location, it may not be accurate. The phone sends information about nearby cell towers and WiFi AP's to a location service on the web, and the response is usually the location of the cell tower you're connected to. Sometimes it is not. I'm working on fixing this though. In the mean time, you can ensure that the location that comes back is more accurately a cell tower by disabling WiFi on your phone.
   * *Waiting for signal (network)* - If you see *Waiting for signal...* for the network location (the one with the star), there is a workaround. Exit CellFinder, go into the Settings of the phone, go to Security & Location, then uncheck both *Use wireless networks* and *Enable GPS satellites*. Wait a few seconds, then re-check them. When you go back into CellFinder, it should get the CID and LAC of your tower and be able to get the location.
   * *Waiting for signal (GPS)* - If you see *Waiting for signal...* for the GPS location, the GPS can't see enough satellites to get a fix. The only way to get around this is to go somewhere with a clear view of the sky.
 
