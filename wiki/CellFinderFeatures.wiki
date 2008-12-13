@@ -15,7 +15,7 @@ These are the features that are currently in CellFinder on the Android Market. T
 
 == 1.1 ==
 
-Version 1.1 is not release, but the following features are checked into SVN and will be part of 1.1 when it comes out:
+Version 1.1 is not released, but the following features are checked into SVN and will be part of 1.1 when it comes out:
 
   * Signal strength in dBm
   * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
