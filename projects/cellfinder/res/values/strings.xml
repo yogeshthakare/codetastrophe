@@ -24,7 +24,7 @@
     <string name="distance_fmt_meters">&lt;b&gt;Distance:&lt;/b&gt; %d m</string>
     <string name="distance_fmt_miles">&lt;b&gt;Distance:&lt;/b&gt; %.2f miles</string>
     <string name="distance_fmt_feet">&lt;b&gt;Distance:&lt;/b&gt; %d ft</string>
-    <string name="signal_fmt">&lt;b&gt;Signal Strength:&lt;/b&gt; %d asu</string> 
+    <string name="signal_fmt">&lt;b&gt;Signal Strength:&lt;/b&gt; %d asu, %s dBm</string> 
     <string name="ddm_fmt">%s° %s\' </string>
     <string name="min_fmt">00.000</string>
     <string name="bold_fmt">&lt;b&gt;%s&lt;/b&gt;</string>
