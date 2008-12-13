@@ -138,10 +138,8 @@ public class MyLocationListener implements LocationListener {
 			if (!gp.equals(mFineLastGP)) {
 				mFineLastGP = gp;
 
-				if (mCoarseLastGP != null) {
-					UpdateOverlays();
-					zoomAndCenterMap();
-				}
+				UpdateOverlays();
+				zoomAndCenterMap();
 			}
 		} else if (prov.equals(mCoarseLocationProvider)) {
 			// Log.d(CellFinderMapActivity.CELLFINDER,
@@ -154,10 +152,8 @@ public class MyLocationListener implements LocationListener {
 			if (!gp.equals(mCoarseLastGP)) {
 				mCoarseLastGP = gp;
 
-				if (mFineLastGP != null) {
-					UpdateOverlays();
-					zoomAndCenterMap();
-				}
+				UpdateOverlays();
+				zoomAndCenterMap();
 			}
 
 		}
@@ -397,6 +393,12 @@ public class MyLocationListener implements LocationListener {
 				int loncen = (Math.max(lon1, lon2) + Math.min(lon1, lon2)) / 2;
 				mc.setCenter(new GeoPoint(latcen, loncen));
 			}
+		} else if(mFineLastGP != null) {
+			// if we only have the fine location, use that
+			mc.setCenter(mFineLastGP);
+		} else if(mCoarseLastGP != null) {
+			// if we only have the coarse location, use that
+			mc.setCenter(mCoarseLastGP);
 		}
 	}
 }
