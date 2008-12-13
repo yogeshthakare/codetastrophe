@@ -13,11 +13,15 @@ These are the features that are currently in CellFinder on the Android Market. T
   * Satellite view - show satellite view from Google
   * Show cell data - show information about the connected cell tower (Operator name, MCC, MNC, Cell CID, Cell LAC, Signal strength in 'asu', cell tower coordinates, GPS coordinates
 
+== 1.1 ==
+
+Version 1.1 is not release, but the following features are checked into SVN and will be part of 1.1 when it comes out:
+
+  * Signal strength in dBm
+  * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
+
 = Feature Requests =
 
-  * Signal strength in dBm (done, will be in 1.1)
-  * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
-  * Toggle GPS off - similar to above feature, but will make CellFinder not even attempt to use GPS
   * Show coordinates in other formats - "DD MM SS.ss" and "DD.ddddd" have been mentioned specifically
   * Other cell base station information - BCCH, BSIC, NCC, and BCC - not really sure if this is possible with the Android platform
   * Show neighboring cells - I know that the hardware has this ability, but I don't know if it's possible to get at from a userland process. The Phone app holds the only handle to the RID service that can talk directly to the GSM chipset.
