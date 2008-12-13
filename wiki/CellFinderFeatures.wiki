@@ -23,7 +23,6 @@ Version 1.1 is not released, but the following features are checked into SVN and
 
 = Feature Requests =
 
-  * Show coordinates in other formats - "DD MM SS.ss" and "DD.ddddd" have been mentioned specifically
   * Other cell base station information - BCCH, BSIC, NCC, and BCC - not really sure if this is possible with the Android platform
   * Show neighboring cells - I know that the hardware has this ability, but I don't know if it's possible to get at from a userland process. The Phone app holds the only handle to the RID service that can talk directly to the GSM chipset.
   * Storing data - this is a longer term project. It would be nice if CellFinder kept a database of all cell towers it has seen and had the ability to display them on a map
