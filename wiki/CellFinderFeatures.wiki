@@ -1,5 +1,5 @@
 #summary Current and future features in CellFinder
-#labels cellfinder
+#labels cellfinder,Featured
 
 = Existing Features =
 
@@ -19,6 +19,7 @@ Version 1.1 is not released, but the following features are checked into SVN and
 
   * Signal strength in dBm
   * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
+  * Show coordinates in other formats - DD.ddddd, DD MM.mmm, and DD MM SS.ss
 
 = Feature Requests =
 
