@@ -18,6 +18,14 @@
 		android:title="@string/pref_title_auto_zoom"
 		/>
 	<ListPreference
+		android:key="@string/pref_title_coord_fmt"
+		android:defaultValue="@string/pref_value_coord_fmt_ddms"
+		android:title="@string/pref_title_coord_fmt"
+		android:entries="@array/pref_coord_fmt_options"
+		android:entryValues="@array/pref_coord_fmt_options"
+		android:dialogTitle="@string/pref_title_coord_fmt"
+		/>
+	<ListPreference
 		android:key="@string/pref_title_dist_unit"
 		android:defaultValue="@string/pref_value_dist_unit_meters"
 		android:title="@string/pref_title_dist_unit"
