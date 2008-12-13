@@ -279,6 +279,8 @@ public class CellFinderMapActivity extends MapActivity implements
 				getString(R.string.pref_title_location_refresh), null);
 		boolean showCellData = mPreferences.getBoolean(
 				getString(R.string.pref_title_show_cell_data), true);
+		String coordFmt = mPreferences.getString(
+				getString(R.string.pref_title_coord_fmt), null);
 
 		// show or hide the cell info view
 		if (!showCellData) {
@@ -322,22 +324,15 @@ public class CellFinderMapActivity extends MapActivity implements
 			// set auto-centering preferences by integer becuase it's less
 			// typing. also faster
 			// when the map has to decide how to update
-			if (getString(R.string.pref_center_option_midpoint).equals(
-					autoCenter)) {
-				mLocationListener
-						.setAutoCenter(MyLocationListener.AUTO_CENTER_MIDPOINT);
-			} else if (getString(R.string.pref_center_option_network).equals(
-					autoCenter)) {
-				mLocationListener
-						.setAutoCenter(MyLocationListener.AUTO_CENTER_NETWORK);
-			} else if (getString(R.string.pref_center_option_none).equals(
-					autoCenter)) {
-				mLocationListener
-						.setAutoCenter(MyLocationListener.AUTO_CENTER_NONE);
+			if (getString(R.string.pref_center_option_midpoint).equals(autoCenter)) {
+				mLocationListener.setAutoCenter(MyLocationListener.AUTO_CENTER_MIDPOINT);
+			} else if (getString(R.string.pref_center_option_network).equals(autoCenter)) {
+				mLocationListener.setAutoCenter(MyLocationListener.AUTO_CENTER_NETWORK);
+			} else if (getString(R.string.pref_center_option_none).equals(autoCenter)) {
+				mLocationListener.setAutoCenter(MyLocationListener.AUTO_CENTER_NONE);
 			} else {
 				// default to gps
-				mLocationListener
-						.setAutoCenter(MyLocationListener.AUTO_CENTER_GPS);
+				mLocationListener.setAutoCenter(MyLocationListener.AUTO_CENTER_GPS);
 			}
 
 			// set distance unit preferences
@@ -348,6 +343,15 @@ public class CellFinderMapActivity extends MapActivity implements
 				mLocationListener.setUnits(MyLocationListener.UNITS_MILES);
 			} else {
 				mLocationListener.setUnits(MyLocationListener.UNITS_METERS);
+			}
+			
+			// set coordinate format preference
+			if(getString(R.string.pref_value_coord_fmt_dd).equals(coordFmt)) {
+				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DD);
+			} else if (getString(R.string.pref_value_coord_fmt_ddms).equals(coordFmt)) {
+				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DDMS);
+			} else {
+				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DDM);
 			}
 		}
 	}

@@ -18,6 +18,7 @@ package com.codetastrophe.cellfinder;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
@@ -33,17 +34,23 @@ public class SettingsActivity extends PreferenceActivity implements
 	}
 
 	private void refreshSettings() {
-		ListPreference center = (ListPreference) findPreference(getResources()
-				.getString(R.string.pref_title_auto_center));
+		Resources resources = getResources();
+		
+		ListPreference center = (ListPreference) findPreference(
+				resources.getString(R.string.pref_title_auto_center));
 		center.setSummary(center.getEntry());
 
-		ListPreference units = (ListPreference) findPreference(getResources()
-				.getString(R.string.pref_title_dist_unit));
+		ListPreference units = (ListPreference) findPreference(
+				resources.getString(R.string.pref_title_dist_unit));
 		units.setSummary(units.getEntry());
 
-		ListPreference refresh = (ListPreference) findPreference(getResources()
-				.getString(R.string.pref_title_location_refresh));
+		ListPreference refresh = (ListPreference) findPreference(
+				resources.getString(R.string.pref_title_location_refresh));
 		refresh.setSummary(refresh.getEntry());
+		
+		ListPreference coordfmt = (ListPreference) findPreference(
+				resources.getString(R.string.pref_title_coord_fmt));
+		coordfmt.setSummary(coordfmt.getEntry());
 	}
 
 	@Override

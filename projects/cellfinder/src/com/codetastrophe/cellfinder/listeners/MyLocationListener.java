@@ -51,6 +51,10 @@ public class MyLocationListener implements LocationListener {
 	public static final int UNITS_METERS = 0;
 	public static final int UNITS_FEET = 1;
 	public static final int UNITS_MILES = 2;
+	
+	public static final int LOCATION_FMT_DDM = 0;
+	public static final int LOCATION_FMT_DDMS = 1;
+	public static final int LOCATION_FMT_DD = 2;
 
 	private Context mContext = null;
 	private GeoPoint mCoarseLastGP = null;
@@ -70,6 +74,7 @@ public class MyLocationListener implements LocationListener {
 	private boolean mAutoZoom = false;
 	private int mAutoCenter = 0;
 	private int mUnits = 0;
+	private int mLocationFmt = 0;
 
 	private static String[] mDirs = new String[] { "N", "NE", "E", "SE", "S",
 			"SW", "W", "NW", "N" };
@@ -224,6 +229,10 @@ public class MyLocationListener implements LocationListener {
 
 		zoomAndCenterMap();
 	}
+	
+	public void setLocationFormat(int fmt) {
+		mLocationFmt = fmt;
+	}
 
 	public void setSatellite(boolean enabled) {
 		mMapView.setSatellite(enabled);
@@ -246,10 +255,33 @@ public class MyLocationListener implements LocationListener {
 		coord -= deg;
 		coord *= 60;
 
-		DecimalFormat df = new DecimalFormat(mContext
-				.getString(R.string.min_fmt));
-		return String.format(mContext.getString(R.string.ddm_fmt), deg, df
-				.format(coord));
+		DecimalFormat df = new DecimalFormat(mContext.getString(R.string.min_fmt));
+		return String.format(mContext.getString(R.string.ddm_fmt), deg, df.format(coord));
+	}
+	
+	private String getDDMS(double coord) {
+		if (coord < 0)
+			coord = -coord;
+
+		int deg = (int) Math.floor(coord);
+		coord -= deg;
+		coord *= 60;
+
+		int min = (int) Math.floor(coord);
+		coord -= min;
+		coord *= 60;
+		
+		DecimalFormat df = new DecimalFormat(mContext.getString(R.string.sec_fmt));
+		return String.format(mContext.getString(R.string.ddms_fmt), deg, min, df.format(coord));
+	}
+	
+	private String getDD(double coord) {
+		if (coord < 0)
+			coord = -coord;
+
+		DecimalFormat df = new DecimalFormat(mContext.getString(R.string.deg_fmt));
+
+		return String.format(mContext.getString(R.string.dd_fmt), df.format(coord));
 	}
 
 	private Location getLastLocationForProvider(String provider) {
@@ -276,18 +308,34 @@ public class MyLocationListener implements LocationListener {
 
 	private String getNiceLocation(Location loc) {
 		StringBuilder sb = new StringBuilder();
-
 		double lat = loc.getLatitude();
 		double lon = loc.getLongitude();
 
-		sb.append(getDDM(lat));
+		String latStr, lonStr;
+		
+		switch (mLocationFmt) {
+		case LOCATION_FMT_DD:
+			latStr = getDD(lat);
+			lonStr = getDD(lon);
+			break;
+		case LOCATION_FMT_DDM:
+			latStr = getDDM(lat);
+			lonStr = getDDM(lon);
+			break;
+		default: // LOCATION_FMT_DDMS
+			latStr = getDDMS(lat);
+			lonStr = getDDMS(lon);
+			break;
+		}
+		
+		sb.append(latStr);
 		if (lat > 0)
 			sb.append("N");
 		else
 			sb.append("S");
 
 		sb.append(", ");
-		sb.append(getDDM(lon));
+		sb.append(lonStr);
 		if (lon > 0)
 			sb.append("E");
 		else
