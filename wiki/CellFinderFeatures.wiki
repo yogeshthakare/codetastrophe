@@ -24,6 +24,7 @@ These are the features that are currently in CellFinder on the Android Market. T
   * Storing data - this is a longer term project. It would be nice if CellFinder kept a database of all cell towers it has seen and had the ability to display them on a map
   * Ensure only cell tower location is retrieved - right now, it's possible for Google to send a location that is actually a WiFi AP. This needs fixed
   * Compass-based map orientation
+  * Update notification
 
 = Possible Bugs =
 
