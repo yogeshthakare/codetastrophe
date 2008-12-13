@@ -110,8 +110,21 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		// "MyPhoneStateListener.onSignalStrengthChanged()");
 		super.onSignalStrengthChanged(asu);
 
+		// dBm calculation comes from PhoneStateIntentReceiver.java in the 
+		// Android source code
+
+		String dbmStr = "Unknown";
+		
+		if(asu != -1) {
+			if(asu == 0) dbmStr = "-113 or less";
+			else if (asu == 31) dbmStr = "-51 or greater";
+			else {
+				dbmStr = ((Integer)(-113 + 2*asu)).toString();
+			}
+		}
+		
 		mTvSignalStr.setText(StyledResourceHelper.GetStyledString(mContext,
-				R.string.signal_fmt, asu));
+				R.string.signal_fmt, asu, dbmStr));
 	}
 
 	private void clearTextViews() {
