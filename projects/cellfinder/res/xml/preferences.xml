@@ -17,6 +17,13 @@
 		android:summaryOff="@string/perf_summary_auto_zoom_off"
 		android:title="@string/pref_title_auto_zoom"
 		/>
+	<CheckBoxPreference
+		android:key="@string/pref_title_compass"
+		android:defaultValue="false"
+		android:summaryOn="@string/perf_summary_compass_on"
+		android:summaryOff="@string/perf_summary_compass_off"
+		android:title="@string/pref_title_compass"
+		/>
 	<ListPreference
 		android:key="@string/pref_title_coord_fmt"
 		android:defaultValue="@string/pref_value_coord_fmt_ddms"
