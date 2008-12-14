@@ -281,6 +281,8 @@ public class CellFinderMapActivity extends MapActivity implements
 				getString(R.string.pref_title_show_cell_data), true);
 		String coordFmt = mPreferences.getString(
 				getString(R.string.pref_title_coord_fmt), null);
+		boolean compass = mPreferences.getBoolean(
+				getString(R.string.pref_title_compass), false);
 
 		// show or hide the cell info view
 		if (!showCellData) {
@@ -338,8 +340,7 @@ public class CellFinderMapActivity extends MapActivity implements
 			// set distance unit preferences
 			if (getString(R.string.pref_value_dist_unit_feet).equals(units)) {
 				mLocationListener.setUnits(MyLocationListener.UNITS_FEET);
-			} else if (getString(R.string.pref_value_dist_unit_miles).equals(
-					units)) {
+			} else if (getString(R.string.pref_value_dist_unit_miles).equals(units)) {
 				mLocationListener.setUnits(MyLocationListener.UNITS_MILES);
 			} else {
 				mLocationListener.setUnits(MyLocationListener.UNITS_METERS);
@@ -353,6 +354,9 @@ public class CellFinderMapActivity extends MapActivity implements
 			} else {
 				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DDM);
 			}
+			
+			// set compass
+			mLocationListener.setCompass(compass);
 		}
 	}
 
@@ -413,6 +417,7 @@ public class CellFinderMapActivity extends MapActivity implements
 		// "CellFinder.onPause() - stopping telephony and location listeners");
 		super.onPause();
 		stopListeners();
+		mLocationListener.pause();
 	}
 
 	@Override
@@ -421,5 +426,6 @@ public class CellFinderMapActivity extends MapActivity implements
 		// "CellFinder.onResume() - starting telephony and location listeners");
 		super.onResume();
 		startListeners();
+		mLocationListener.resume();
 	}
 }

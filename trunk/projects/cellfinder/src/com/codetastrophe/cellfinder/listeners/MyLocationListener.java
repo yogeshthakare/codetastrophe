@@ -27,6 +27,7 @@ import com.codetastrophe.cellfinder.utils.StyledResourceHelper;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
 import android.app.Activity;
@@ -75,6 +76,9 @@ public class MyLocationListener implements LocationListener {
 	private int mAutoCenter = 0;
 	private int mUnits = 0;
 	private int mLocationFmt = 0;
+	private boolean mCompass = false;
+	
+	private MyLocationOverlay mMyLocationOverlay;
 
 	private static String[] mDirs = new String[] { "N", "NE", "E", "SE", "S",
 			"SW", "W", "NW", "N" };
@@ -86,11 +90,11 @@ public class MyLocationListener implements LocationListener {
 		mMapView = (MapView) a.findViewById(R.id.map_view);
 		mTvCellBearing = (TextView) a.findViewById(R.id.tv_cell_bearing);
 		mTvCellDirection = (TextView) a.findViewById(R.id.tv_cell_direction);
-
+		
 		CellFinderMapActivity cf = (CellFinderMapActivity) a;
 		mCoarseLocationProvider = cf.getCoarseLocationProvider();
 		mFineLocationProvider = cf.getFineLocationProvider();
-
+		
 		mCoarseLocationOverlay = new ImageOverlay(a.getResources().getDrawable(
 				R.drawable.star_small), null);
 		mFineLocationOverlay = new ImageOverlay(a.getResources().getDrawable(
@@ -204,6 +208,18 @@ public class MyLocationListener implements LocationListener {
 			break;
 		}
 	}
+	
+	public void pause() {
+		if(mMyLocationOverlay != null && mCompass) {
+			mMyLocationOverlay.disableCompass();
+		}
+	}
+	
+	public void resume() {
+		if(mMyLocationOverlay != null && mCompass) {
+			mMyLocationOverlay.enableCompass();
+		}
+	}
 
 	public void setAutoCenter(int autocenter) {
 		mAutoCenter = autocenter;
@@ -240,6 +256,17 @@ public class MyLocationListener implements LocationListener {
 
 	public void setUnits(int units) {
 		mUnits = units;
+	}
+	
+	public void setCompass(boolean enabled) {
+		mCompass = enabled;
+		if(enabled) {
+			mMyLocationOverlay = new MyLocationOverlay(mContext, mMapView);
+			mMyLocationOverlay.disableMyLocation();
+			mMyLocationOverlay.enableCompass();
+		} else {
+			mMyLocationOverlay = null;
+		}
 	}
 
 	private void clearBearing() {
@@ -406,6 +433,10 @@ public class MyLocationListener implements LocationListener {
 		overlays.add(mLineOverlay);
 		overlays.add(mCoarseLocationOverlay);
 		overlays.add(mFineLocationOverlay);
+		
+		if(mMyLocationOverlay != null && mCompass) {
+			overlays.add(mMyLocationOverlay);
+		}
 	}
 
 	private void zoomAndCenterMap() {

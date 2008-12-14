@@ -46,6 +46,10 @@
     <string name="perf_summary_satellite_on">Show satellite view</string>
     <string name="perf_summary_satellite_off">Show map view</string>
 
+    <string name="pref_title_compass">Compass</string>
+    <string name="perf_summary_compass_on">Show compass</string>
+    <string name="perf_summary_compass_off">Hide compass</string>
+
 	<string name="pref_title_dist_unit">Distance Units</string>
 	<string name="pref_value_dist_unit_miles">Miles</string>
 	<string name="pref_value_dist_unit_feet">Feet</string>
