@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for message in messages %}
+<h2>{{ message.name }}</h2>
+<p>{{ message.content|safe }}</p>
+<br/>
+{% endfor %}
+
+<a href="{{ next }}">Continue</a>
+
+{% endblock %}
