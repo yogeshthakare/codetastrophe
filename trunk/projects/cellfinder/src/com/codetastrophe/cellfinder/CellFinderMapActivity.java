@@ -123,50 +123,8 @@ public class CellFinderMapActivity extends MapActivity implements
 		// get the location manager reference
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-		// look for the 'network' location provider or something else that might
-		// be acceptable. if there are issues, error dialogs are generated. if
-		// null is
-		// returned, this app won't work so just return
-		mCoarseLocationProvider = getLocationProvider(
-				getString(R.string.provider_network),
-				getString(R.string.provider_coarse), Criteria.ACCURACY_COARSE);
-
-		if (mCoarseLocationProvider == null) {
-			ErrorDialog.Show(this, getString(R.string.provider_coarse_error),
-					errorFinishListener);
-			return;
-		}
-
-		// now look for the 'gps' location provider
-		mFineLocationProvider = getLocationProvider(
-				getString(R.string.provider_gps),
-				getString(R.string.provider_fine), Criteria.ACCURACY_FINE);
-
-		if (mFineLocationProvider == null) {
-			ErrorDialog.Show(this, getString(R.string.provider_fine_error),
-					errorFinishListener);
-			return;
-		}
-
-		// need to do this so the listeners below can access the view elements
+		// set up the layout
 		setContentView(R.layout.main);
-
-		// set up location listener and manager, but don't start anything yet
-		mLocationListener = new MyLocationListener(this);
-
-		// get phone listener and telephony manager, but don't start
-		// anything yet
-		mPhoneStateListener = new MyPhoneStateListener(this);
-		mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-		// check to see if the phone is turned on. this listener
-		// checks for service and displays a dialog box if there are
-		// any problems. the callback immediately unregisters itself.
-		mTelephonyManager.listen(statusCheckListener,
-				PhoneStateListener.LISTEN_SERVICE_STATE);
-
-		// finally load the user preferences
-		loadPreferences();
 	}
 
 	@Override
@@ -360,6 +318,47 @@ public class CellFinderMapActivity extends MapActivity implements
 		}
 	}
 
+	private void setupListeners() {
+		// look for the 'network' location provider or something else that might
+		// be acceptable. if there are issues, error dialogs are generated. if
+		// null is
+		// returned, this app won't work so just return
+		mCoarseLocationProvider = getLocationProvider(
+				getString(R.string.provider_network),
+				getString(R.string.provider_coarse), Criteria.ACCURACY_COARSE);
+
+		if (mCoarseLocationProvider == null) {
+			ErrorDialog.Show(this, getString(R.string.provider_coarse_error),
+					errorFinishListener);
+			return;
+		}
+
+		// now look for the 'gps' location provider
+		mFineLocationProvider = getLocationProvider(
+				getString(R.string.provider_gps),
+				getString(R.string.provider_fine), Criteria.ACCURACY_FINE);
+
+		if (mFineLocationProvider == null) {
+			ErrorDialog.Show(this, getString(R.string.provider_fine_error),
+					errorFinishListener);
+			return;
+		}
+
+		// set up location listener and manager, but don't start anything yet
+		mLocationListener = new MyLocationListener(this);
+
+		// get phone listener and telephony manager, but don't start
+		// anything yet
+		mPhoneStateListener = new MyPhoneStateListener(this);
+		mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+		// check to see if the phone is turned on. this listener
+		// checks for service and displays a dialog box if there are
+		// any problems. the callback immediately unregisters itself.
+		mTelephonyManager.listen(statusCheckListener,
+				PhoneStateListener.LISTEN_SERVICE_STATE);
+	}
+	
 	// start the two listeners - called during onResume and when refreshing
 	// setting changes
 	private void startListeners() {
@@ -417,7 +416,9 @@ public class CellFinderMapActivity extends MapActivity implements
 		// "CellFinder.onPause() - stopping telephony and location listeners");
 		super.onPause();
 		stopListeners();
-		mLocationListener.pause();
+		if(mLocationListener != null) {
+			mLocationListener.pause();
+		}
 	}
 
 	@Override
@@ -425,7 +426,13 @@ public class CellFinderMapActivity extends MapActivity implements
 		// Log.d(CELLFINDER,
 		// "CellFinder.onResume() - starting telephony and location listeners");
 		super.onResume();
+		
+		setupListeners();
+		loadPreferences();
 		startListeners();
-		mLocationListener.resume();
+		
+		if(mLocationListener != null) {
+			mLocationListener.resume();
+		}
 	}
 }
