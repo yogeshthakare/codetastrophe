@@ -3,7 +3,17 @@
 
 = Existing Features =
 
-These are the features that are currently in CellFinder on the Android Market. The current version is 1.0.
+These are the features that are currently in CellFinder on the Android Market. The current version is 1.1.
+
+== 1.1 ==
+
+Version 1.1 was released on 12/21/2008 with these new features:
+
+  * Signal strength in dBm
+  * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
+  * Show coordinates in other formats - DD.ddddd, DD MM.mmm, and DD MM SS.ss
+  * Setting to enable a compass overlay on the map. Orienting the map based on the compass was requested, but this is much easier and hopefully just as useful.
+  * About box shows application version in title
 
 == 1.0 ==
   * Auto Center Map - can center on midpoint, the GPS location, the network location, or can be disabled for panning around manually
@@ -12,16 +22,6 @@ These are the features that are currently in CellFinder on the Android Market. T
   * Location refresh - configure the time between GPS updates to a value between 0 and 120 seconds
   * Satellite view - show satellite view from Google
   * Show cell data - show information about the connected cell tower (Operator name, MCC, MNC, Cell CID, Cell LAC, Signal strength in 'asu', cell tower coordinates, GPS coordinates
-
-== 1.1 ==
-
-Version 1.1 is not released, but the following features are checked into SVN and will be part of 1.1 when it comes out:
-
-  * Signal strength in dBm
-  * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
-  * Show coordinates in other formats - DD.ddddd, DD MM.mmm, and DD MM SS.ss
-  * Setting to enable a compass overlay on the map. Orienting the map based on the compass was requested, but this is much easier and hopefully just as useful.
-  * About box shows application version in title
 
 = Feature Requests =
 
