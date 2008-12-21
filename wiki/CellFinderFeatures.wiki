@@ -3,7 +3,11 @@
 
 = Existing Features =
 
-These are the features that are currently in CellFinder on the Android Market. The current version is 1.1.
+These are the features that are currently in CellFinder on the Android Market. The current version is 1.2.
+
+== 1.2 ==
+
+Version 1.2 was released a few hours after 1.1 because of a major crashing bug. CellFinder would crash if started with the GPS disabled.
 
 == 1.1 ==
 
