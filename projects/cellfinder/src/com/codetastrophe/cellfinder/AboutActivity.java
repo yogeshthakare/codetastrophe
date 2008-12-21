@@ -17,6 +17,9 @@
 package com.codetastrophe.cellfinder;
 
 import android.app.Activity;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.Window;
 
@@ -29,8 +32,20 @@ public class AboutActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_LEFT_ICON);
 		setContentView(R.layout.about);
 
-		getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
+		Window window = getWindow();
+		window.setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
 				R.drawable.icon_48x48);
 
+		PackageManager packageManager = getPackageManager();
+		PackageInfo packageInfo;
+		try {
+			String me = getString(R.string.app_package);
+			packageInfo = packageManager.getPackageInfo(me, 0);
+		} catch (NameNotFoundException e) {
+			// oh well
+			return;
+		}
+		
+		setTitle(String.format(getString(R.string.about_title_fmt, packageInfo.versionName)));
 	}
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CellFinder</string>
+    <string name="app_package">com.codetastrophe.cellfinder</string>
     <string name="provider_coarse_error">Can't access the Network location provider. Please ensure this location source is enabled in Settings, Location &amp; security, Use wireless networks.</string>
     <string name="provider_fine_error">Can't access the GPS location provider. Please ensure this location source is enabled in Settings, Location &amp; security, Enable GPS satellites.</string>
     <string name="provider_warning">We tried to use location provider '%s' but found '%s' instead. Let's hope it works!</string>
@@ -85,8 +86,9 @@
     <string name="pref_title_show_cell_data">Show cell data</string>
     <string name="pref_summary_show_cell_data_on">Show cell data</string>
     <string name="pref_summary_show_cell_data_off">Show map fullscreen</string>
-    
+
     <string name="about_title">About CellFinder</string>
+    <string name="about_title_fmt">CellFinder %s</string>
     <string name="about_text">(c) 2008 Jon Larimer - jlarimer@gmail.com\n\n
 <b>CellFinder</b> is a tool to locate the cell tower your phone is currently connected to. It 
 requires access to both the GPS and the Network location services. These settings are 
