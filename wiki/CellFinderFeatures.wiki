@@ -21,6 +21,7 @@ Version 1.1 is not released, but the following features are checked into SVN and
   * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
   * Show coordinates in other formats - DD.ddddd, DD MM.mmm, and DD MM SS.ss
   * Setting to enable a compass overlay on the map. Orienting the map based on the compass was requested, but this is much easier and hopefully just as useful.
+  * About box shows application version in title
 
 = Feature Requests =
 
