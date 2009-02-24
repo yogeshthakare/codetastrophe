@@ -1,20 +1,20 @@
 /*
  * hhadump.c  v0.2
- *      
+ *
  * Copyright 2008-2009 Bob Thomas <bob@pleep.com>
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at 
- * 
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. 
- *      
+ *
  */
 
 
@@ -56,19 +56,19 @@ void cleanup(struct hha_file *file, FILE *fp) {
 }
 
 static int create_dir(char *path) {
-    char *p;
+	char *p;
 
-    for (p = path + 1; *p != '\0'; ++p) {
-        if (*p == '/') {
-             *p = '\0';
-             if (mkdir(path, 0755) && errno != EEXIST)
-                return 1;
-             *p = '/';
-         }
-     }
-     if (mkdir(path, 0755) && errno != EEXIST)
-         return 1;
-	 return 0;
+	for (p = path + 1; *p != '\0'; ++p) {
+		if (*p == '/') {
+			*p = '\0';
+			if (mkdir(path, 0755) && errno != EEXIST)
+			return 1;
+			*p = '/';
+		}
+	}
+	if (mkdir(path, 0755) && errno != EEXIST)
+		return 1;
+	return 0;
 }
 
 int main(int argc, char **argv) {

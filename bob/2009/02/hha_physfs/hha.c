@@ -4,7 +4,7 @@
  * This driver handles Hothead archives (HHA), developed by
  * Hothead Games, Inc.
  * 
- * Compression types deciphered by Maks Verver <maksverver@geocities.com>
+ * 
  * 
  * Based on grp.c and zip.c
  */
@@ -40,10 +40,10 @@
 /* file metadata structure */
 typedef struct
 {
-	char *dir;              /* directory name */
-	char *name;             /* file name */
-	PHYSFS_uint32 compress; /* compression level (0-2) */
-	PHYSFS_uint32 offset; /* offset from start of file */
+    char *dir;                        /* directory name */
+    char *name;                       /* file name */
+    PHYSFS_uint32 compress;           /* compression level (0-2) */
+    PHYSFS_uint32 offset;             /* offset from start of file */
     PHYSFS_uint32 uncompressed_size;  /* compressed size */
     PHYSFS_uint32 compressed_size;    /* uncompressed size */
 } HHAentry;
@@ -51,14 +51,14 @@ typedef struct
 /* HHA file header and metadata */
 typedef struct
 {
-	PHYSFS_uint32 entryCount;     /* number of files */
-	
-	char *filenames;             /* filename list */
-	HHAentry *entries;           /* file metadata */
-	
-	/* filesystem info for PhysFS */
-	char *filename;
-	PHYSFS_sint64 last_mod_time;
+    PHYSFS_uint32 entryCount;    /* number of files */
+    
+    char *filenames;             /* filename list */
+    HHAentry *entries;           /* file metadata */
+    
+    /* filesystem info for PhysFS */
+    char *filename;
+    PHYSFS_sint64 last_mod_time;
 } HHAinfo;
 
 typedef struct
@@ -68,8 +68,8 @@ typedef struct
     PHYSFS_uint32 compressed_position;    /* offset in compressed data. */
     PHYSFS_uint32 uncompressed_position;  /* tell() position.           */
     PHYSFS_uint8 *buffer;                 /* decompression buffer.      */
-	z_stream zlib_stream;                 /* zlib stream state.         */
-	/*TODO LZMA stream */
+    z_stream zlib_stream;                 /* zlib stream state.         */
+    /*TODO LZMA stream */
 } HHAfileinfo;
 
 /* ZLIB functions copied from zip.c */
@@ -140,7 +140,7 @@ static void HHA_dirClose(dvoid *opaque)
 {
     HHAinfo *info = ((HHAinfo *) opaque);
     allocator.Free(info->filename);
-	allocator.Free(info->filenames);
+    allocator.Free(info->filenames);
     allocator.Free(info->entries);
     allocator.Free(info);
 } /* HHA_dirClose */
@@ -168,12 +168,12 @@ static PHYSFS_sint64 HHA_read(fvoid *opaque, void *buffer,
 
 
     if (entry->compress == HHA_COMPRESS_NONE)
-	{
+    {
         retval = __PHYSFS_platformRead(finfo->handle, buffer, objSize, objCount);
-	}
-	else if (entry->compress == HHA_COMPRESS_ZLIB)
-	{
-		finfo->zlib_stream.next_out = buffer;
+    }
+    else if (entry->compress == HHA_COMPRESS_ZLIB)
+    {
+        finfo->zlib_stream.next_out = buffer;
         finfo->zlib_stream.avail_out = objSize * objCount;
 
         while (retval < maxread)
@@ -211,7 +211,7 @@ static PHYSFS_sint64 HHA_read(fvoid *opaque, void *buffer,
         } /* while */
 
         retval /= objSize;
-	}
+    }
     if (retval > 0)
         finfo->uncompressed_position += (PHYSFS_uint32) (retval * objSize);
 
@@ -243,16 +243,16 @@ static int HHA_seek(fvoid *opaque, PHYSFS_uint64 offset)
 {
     HHAfileinfo *finfo = (HHAfileinfo *) opaque;
     HHAentry *entry = finfo->entry;
-	void *in = finfo->handle;
+    void *in = finfo->handle;
 
     BAIL_IF_MACRO(offset < 0, ERR_INVALID_ARGUMENT, 0);
     BAIL_IF_MACRO(offset >= entry->uncompressed_size, ERR_PAST_EOF, 0);
-	if (entry->compress == HHA_COMPRESS_NONE)
-	{
+    if (entry->compress == HHA_COMPRESS_NONE)
+    {
         PHYSFS_sint64 newpos = offset + entry->offset;
         BAIL_IF_MACRO(!__PHYSFS_platformSeek(in, newpos), NULL, 0);
         finfo->uncompressed_position = (PHYSFS_uint32) offset;
-	}
+    }
     else if (entry->compress == HHA_COMPRESS_ZLIB)
     {
         /*
@@ -290,7 +290,8 @@ static int HHA_seek(fvoid *opaque, PHYSFS_uint64 offset)
                 return(0);
         } /* while */
     } /* else */
-	
+    else
+        printf("LZMA file: %s/%s\n", entry->dir, entry->name);
     return(1);
 } /* HHA_seek */
 
@@ -306,13 +307,13 @@ static int HHA_fileClose(fvoid *opaque)
 {
     HHAfileinfo *finfo = (HHAfileinfo *) opaque;
     BAIL_IF_MACRO(!__PHYSFS_platformClose(finfo->handle), NULL, 0);
-	
-	if (finfo->entry->compress == HHA_COMPRESS_ZLIB)
+    
+    if (finfo->entry->compress == HHA_COMPRESS_ZLIB)
         inflateEnd(&finfo->zlib_stream);
 
     if (finfo->buffer != NULL)
         allocator.Free(finfo->buffer);
-	
+    
     allocator.Free(finfo);
     return(1);
 } /* HHA_fileClose */
@@ -324,7 +325,7 @@ static int hha_open(const char *filename, int forWriting,
     PHYSFS_uint32 magic[2];
 
     *fh = NULL;
-	
+    
     BAIL_IF_MACRO(forWriting, ERR_ARC_IS_READ_ONLY, 0);
     
     *fh = __PHYSFS_platformOpenRead(filename);
@@ -333,15 +334,15 @@ static int hha_open(const char *filename, int forWriting,
     if (__PHYSFS_platformRead(*fh, magic, sizeof(PHYSFS_uint32), 2) != 2)
         goto openHHA_failed;
 
-	magic[0] = PHYSFS_swapULE32(magic[0]);
-	magic[1] = PHYSFS_swapULE32(magic[1]);
+    magic[0] = PHYSFS_swapULE32(magic[0]);
+    magic[1] = PHYSFS_swapULE32(magic[1]);
     if (!(magic[0] == HHA_FILE_MAGIC && magic[1] == HHA_FILE_VERSION))
     {
         __PHYSFS_setError(ERR_UNSUPPORTED_ARCHIVE);
         goto openHHA_failed;
     } /* if */
-	
-	if (__PHYSFS_platformRead(*fh, filenameSize, sizeof (PHYSFS_uint32), 1) != 1)
+    
+    if (__PHYSFS_platformRead(*fh, filenameSize, sizeof (PHYSFS_uint32), 1) != 1)
         goto openHHA_failed;
     *filenameSize = PHYSFS_swapULE32(*filenameSize);
     if (__PHYSFS_platformRead(*fh, count, sizeof (PHYSFS_uint32), 1) != 1)
@@ -364,7 +365,7 @@ openHHA_failed:
 static int HHA_isArchive(const char *filename, int forWriting)
 {
     void *fh;
-	PHYSFS_uint32 nameSize;
+    PHYSFS_uint32 nameSize;
     PHYSFS_uint32 fileCount;
     int retval = hha_open(filename, forWriting, &fh, &nameSize, &fileCount);
 
@@ -379,12 +380,12 @@ static int HHA_entry_cmp(void *_a, PHYSFS_uint32 one, PHYSFS_uint32 two)
 {
     if (one != two)
     {
-		int retval = 0;
+        int retval = 0;
         const HHAentry *a = (const HHAentry *) _a;
-		retval = strcmp(a[one].dir, a[two].dir);
-		if (!retval)
-		    retval = strcmp(a[one].name, a[two].name);
-		return retval;
+        retval = strcmp(a[one].dir, a[two].dir);
+        if (!retval)
+            retval = strcmp(a[one].name, a[two].name);
+        return retval;
     } /* if */
 
     return 0;
@@ -408,15 +409,15 @@ static void HHA_entry_swap(void *_a, PHYSFS_uint32 one, PHYSFS_uint32 two)
 static int HHA_load_entries(const char *name, int forWriting, HHAinfo *info)
 {
     void *fh = NULL;
-	PHYSFS_uint32 fileNameSize;
+    PHYSFS_uint32 fileNameSize;
     PHYSFS_uint32 fileCount;
     HHAentry *entry;
-	PHYSFS_uint32 buf[6];
+    PHYSFS_uint32 buf[6];
 
     BAIL_IF_MACRO(!hha_open(name, forWriting, &fh, &fileNameSize, &fileCount), NULL, 0);
     info->entryCount = fileCount;
-	info->filenames = (char *) allocator.Malloc(fileNameSize);
-	if (info->filenames == NULL)
+    info->filenames = (char *) allocator.Malloc(fileNameSize);
+    if (info->filenames == NULL)
     {
         __PHYSFS_platformClose(fh);
         BAIL_MACRO(ERR_OUT_OF_MEMORY, 0);
@@ -427,9 +428,9 @@ static int HHA_load_entries(const char *name, int forWriting, HHAinfo *info)
         __PHYSFS_platformClose(fh);
         BAIL_MACRO(ERR_OUT_OF_MEMORY, 0);
     } /* if */
-	
-	if (__PHYSFS_platformRead(fh, info->filenames, 1, fileNameSize) != fileNameSize)
-	{
+    
+    if (__PHYSFS_platformRead(fh, info->filenames, 1, fileNameSize) != fileNameSize)
+    {
         __PHYSFS_platformClose(fh);
         return(0);
     } 
@@ -443,10 +444,10 @@ static int HHA_load_entries(const char *name, int forWriting, HHAinfo *info)
         } /* if */
 
         entry->dir = info->filenames + PHYSFS_swapULE32(buf[0]);
-		entry->name = info->filenames + PHYSFS_swapULE32(buf[1]);
-		entry->compress = PHYSFS_swapULE32(buf[2]);
-		entry->offset = PHYSFS_swapULE32(buf[3]);
-		entry->uncompressed_size = PHYSFS_swapULE32(buf[4]);
+        entry->name = info->filenames + PHYSFS_swapULE32(buf[1]);
+        entry->compress = PHYSFS_swapULE32(buf[2]);
+        entry->offset = PHYSFS_swapULE32(buf[3]);
+        entry->uncompressed_size = PHYSFS_swapULE32(buf[4]);
         entry->compressed_size = PHYSFS_swapULE32(buf[5]);
     } /* for */
 
@@ -497,29 +498,29 @@ static HHAentry *HHA_find_entry(HHAinfo *info, const char *name)
     PHYSFS_sint32 lo = 0;
     PHYSFS_sint32 hi = (PHYSFS_sint32) (info->entryCount - 1);
     PHYSFS_sint32 middle;
-	char dirname[256];
-	char filename[256];
+    char dirname[256];
+    char filename[256];
     int rc;
-	
-	char *fpart = strrchr(name, '/');
-	if (fpart != NULL)
-	{
-		strcpy(filename, fpart + 1);
-		strncpy(dirname, name, fpart - name);
-		dirname[fpart - name] = '\0';
-	}
-	else
-	{
-		strcpy(dirname, name);
-		filename[0] = '\0';
-	}
+    
+    char *fpart = strrchr(name, '/');
+    if (fpart != NULL)
+    {
+        strcpy(filename, fpart + 1);
+        strncpy(dirname, name, fpart - name);
+        dirname[fpart - name] = '\0';
+    }
+    else
+    {
+        strcpy(dirname, name);
+        filename[0] = '\0';
+    }
 
     while (lo <= hi)
     {
         middle = lo + ((hi - lo) / 2);
-		rc = strcmp(dirname, a[middle].dir);
-		if (rc == 0 && filename[0])
-	        rc = strcmp(filename, a[middle].name);
+        rc = strcmp(dirname, a[middle].dir);
+        if (rc == 0 && filename[0])
+            rc = strcmp(filename, a[middle].name);
         if (rc == 0)  /* found it! */
             return(&a[middle]);
         else if (rc > 0)
@@ -533,40 +534,42 @@ static HHAentry *HHA_find_entry(HHAinfo *info, const char *name)
 
 static int HHA_isDirectory(dvoid *opaque, const char *name, int *fileExists)
 {
-	HHAinfo *info = (HHAinfo *) opaque;
+    HHAinfo *info = (HHAinfo *) opaque;
     HHAentry *a = info->entries;
     PHYSFS_sint32 lo = 0;
     PHYSFS_sint32 hi = (PHYSFS_sint32) (info->entryCount - 1);
     PHYSFS_sint32 middle;
-	int rc;
-	
-	/* emulate finding a directory by finding a file in the directory */
-	
-	while (lo <= hi)
+    int len = strlen(name);
+    int rc;
+    
+    /* emulate finding a directory by finding a file in the directory */
+    
+    while (lo <= hi)
     {
         middle = lo + ((hi - lo) / 2);
-		rc = strcmp(name, a[middle].dir);
-        if (rc == 0)  /* found it! */
-		{
-			*fileExists = 1;
+        rc = strncmp(name, a[middle].dir, len);
+        if (rc == 0 && (a[middle].dir[len] == '\0'
+                     || a[middle].dir[len] == '/'))
+        {
+            *fileExists = 1;
             return(1);
-		}
-        else if (rc > 0)
-            lo = middle + 1;
-        else
+        }
+        else if (rc < 0)
             hi = middle - 1;
+        else
+            lo = middle + 1;
     } /* while */
-	
-	*fileExists = (HHA_find_entry((HHAinfo *) opaque, name) != NULL);
-	return(0);
+    
+    *fileExists = (HHA_find_entry((HHAinfo *) opaque, name) != NULL);
+    return(0);
 } /* HHA_isDirectory */
 
 static int HHA_exists(dvoid *opaque, const char *name)
 {
-	/* check if file or directory */
-	int exists;
+    /* check if file or directory */
+    int exists;
     (void)HHA_isDirectory(opaque, name, &exists);
-	return exists;
+    return exists;
 } /* HHA_exists */
 
 static int HHA_isSymLink(dvoid *opaque, const char *name, int *fileExists)
@@ -596,48 +599,48 @@ static void HHA_enumerateFiles(dvoid *opaque, const char *dname,
                                int omitSymLinks, PHYSFS_EnumFilesCallback cb,
                                const char *origdir, void *callbackdata)
 {
-	size_t dlen = strlen(dname),
+    size_t dlen = strlen(dname),
            dlen_inc = dlen + ((dlen > 0) ? 1 : 0);
     HHAinfo *info = (HHAinfo *) opaque;
     HHAentry *entry = info->entries;
-	HHAentry *lastEntry = &info->entries[info->entryCount];
-	char lastDir[256];
-	lastDir[0] = '\0';
-	
-	if (dlen)
-	{
-		while (entry < lastEntry)
-		{
-			if (!strncmp(dname, entry->dir, dlen))
-			    break;
-			entry++;
-		}
+    HHAentry *lastEntry = &info->entries[info->entryCount];
+    char lastDir[256];
+    lastDir[0] = '\0';
+    
+    if (dlen)
+    {
+        while (entry < lastEntry)
+        {
+            if (!strncmp(dname, entry->dir, dlen))
+                break;
+            entry++;
+        }
     }
-	
-	
-	while (entry < lastEntry)
-	{
-		if(!strcmp(dname, entry->dir))
-		    doEnumCallback(cb, callbackdata, origdir, entry->name, strlen(entry->name));
-		
-		if(strlen(entry->dir) > dlen)
-		{
-		    char *fname = entry->dir + dlen_inc;
-		    char *dirNameEnd = strchr(fname, '/');
-		    size_t dirNameLen = dirNameEnd - fname;
-		    if (dirNameEnd == NULL)
-		        dirNameLen = strlen(fname);
-		    if (dlen && strncmp(dname, entry->dir, dlen))
-		        break;
-		    if (strncmp(lastDir, fname, dirNameLen))
-		    {
-		        doEnumCallback(cb, callbackdata, origdir, fname, dirNameLen);
-			    strncpy(lastDir, fname, dirNameLen);
-				lastDir[dirNameLen] = '\0';
-		    }
-		}
-		entry++;
-	}
+    
+    
+    while (entry < lastEntry)
+    {
+        if(!strcmp(dname, entry->dir))
+            doEnumCallback(cb, callbackdata, origdir, entry->name, strlen(entry->name));
+        
+        if(strlen(entry->dir) > dlen)
+        {
+            char *fname = entry->dir + dlen_inc;
+            char *dirNameEnd = strchr(fname, '/');
+            size_t dirNameLen = dirNameEnd - fname;
+            if (dirNameEnd == NULL)
+                dirNameLen = strlen(fname);
+            if (dlen && strncmp(dname, entry->dir, dlen))
+                break;
+            if (strncmp(lastDir, fname, dirNameLen))
+            {
+                doEnumCallback(cb, callbackdata, origdir, fname, dirNameLen);
+                strncpy(lastDir, fname, dirNameLen);
+                lastDir[dirNameLen] = '\0';
+            }
+        }
+        entry++;
+    }
 
 } /* HHA_enumerateFiles */
 
@@ -649,7 +652,7 @@ static PHYSFS_sint64 HHA_getLastModTime(dvoid *opaque,
     PHYSFS_sint64 retval = -1;
 
     *fileExists = (HHA_find_entry(info, name) != NULL);
-    if (*fileExists)  /* use time of HHA itself in the physical filesystem. */
+    if (*fileExists)  /* use time of HHA file itself on disk. */
         retval = info->last_mod_time;
 
     return(retval);
@@ -676,12 +679,12 @@ static fvoid *HHA_openRead(dvoid *opaque, const char *fnm, int *fileExists)
         allocator.Free(finfo);
         return(NULL);
     } /* if */
-	
+    
     finfo->entry = entry;
-	
+    
     if (finfo->entry->compress == HHA_COMPRESS_ZLIB)
     {
-	    initializeZStream(&finfo->zlib_stream);
+        initializeZStream(&finfo->zlib_stream);
         if (zlib_err(inflateInit2(&finfo->zlib_stream, -MAX_WBITS)) != Z_OK)
         {
             HHA_fileClose(finfo);
@@ -695,7 +698,7 @@ static fvoid *HHA_openRead(dvoid *opaque, const char *fnm, int *fileExists)
             BAIL_MACRO(ERR_OUT_OF_MEMORY, NULL);
         } /* if */
     } /* if */
-	
+    
     return(finfo);
 } /* HHA_openRead */
 
