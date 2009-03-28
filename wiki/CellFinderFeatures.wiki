@@ -43,7 +43,7 @@ Version 1.1 was released on 12/21/2008 with these new features:
   * Storing data - this is a longer term project. It would be nice if CellFinder kept a database of all cell towers it has seen and had the ability to display them on a map
   * Ensure only cell tower location is retrieved - right now, it's possible for Google to send a location that is actually a WiFi AP. This needs fixed
   * Integration with http://www.deadcellzones.com
-  * Integration with OpenCellID database (http://www.opencellid.org/)
+  * Integration with various Cell ID databases (http://www.opencellid.org/, http://www.celldb.org/)
 
 = Possible Bugs =
 
