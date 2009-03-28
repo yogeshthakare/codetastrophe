@@ -29,6 +29,8 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
+import com.ibm.util.CoordinateConversion;
+import com.ibm.util.CoordinateConversion.LatLon2MGRUTM;
 
 import android.app.Activity;
 import android.content.Context;
@@ -55,6 +57,7 @@ public class MyLocationListener implements LocationListener {
 	public static final int LOCATION_FMT_DDM = 0;
 	public static final int LOCATION_FMT_DDMS = 1;
 	public static final int LOCATION_FMT_DD = 2;
+	public static final int LOCATION_FMT_MGRS = 3;
 
 	private Context mContext = null;
 	private GeoPoint mCoarseLastGP = null;
@@ -80,6 +83,8 @@ public class MyLocationListener implements LocationListener {
 	private MyLocationOverlay mMyLocationOverlay;
 	private LinearLayout mZoomLayout = null;
 	private LinearLayout mZoom = null;
+	
+	private LatLon2MGRUTM mMgrsConversion;
 
 	private static String[] mDirs = new String[] { "N", "NE", "E", "SE", "S",
 			"SW", "W", "NW", "N" };
@@ -140,6 +145,8 @@ public class MyLocationListener implements LocationListener {
 			}
 		}
 
+		mMgrsConversion = new CoordinateConversion().new LatLon2MGRUTM();
+		
 		clearBearing();
 	}
 
@@ -321,6 +328,10 @@ public class MyLocationListener implements LocationListener {
 
 		return String.format(mContext.getString(R.string.dd_fmt), df.format(coord));
 	}
+	
+	private String getMGRS(double lat, double lon) {
+		return mMgrsConversion.convertLatLonToMGRUTM(lat, lon);
+	}
 
 	private Location getLastLocationForProvider(String provider) {
 		if (provider.equals(mFineLocationProvider)) {
@@ -360,24 +371,28 @@ public class MyLocationListener implements LocationListener {
 			latStr = getDDM(lat);
 			lonStr = getDDM(lon);
 			break;
+		case LOCATION_FMT_MGRS:
+			sb.append(getMGRS(lat, lon));
 		default: // LOCATION_FMT_DDMS
 			latStr = getDDMS(lat);
 			lonStr = getDDMS(lon);
 			break;
 		}
 		
-		sb.append(latStr);
-		if (lat > 0)
-			sb.append("N");
-		else
-			sb.append("S");
+		if (mLocationFmt != LOCATION_FMT_MGRS) {
+			sb.append(latStr);
+			if (lat > 0)
+				sb.append("N");
+			else
+				sb.append("S");
 
-		sb.append(", ");
-		sb.append(lonStr);
-		if (lon > 0)
-			sb.append("E");
-		else
-			sb.append("W");
+			sb.append(", ");
+			sb.append(lonStr);
+			if (lon > 0)
+				sb.append("E");
+			else
+				sb.append("W");
+		}
 
 		return sb.toString();
 	}

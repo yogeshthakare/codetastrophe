@@ -10,6 +10,7 @@
 		<item>@string/pref_value_coord_fmt_dd</item>
 		<item>@string/pref_value_coord_fmt_ddm</item>
 		<item>@string/pref_value_coord_fmt_ddms</item>
+		<item>@string/pref_value_coord_fmt_mgrs</item>
 	</string-array>
 	<string-array name="pref_dist_unit_options">
 		<item>@string/pref_value_dist_unit_miles</item>

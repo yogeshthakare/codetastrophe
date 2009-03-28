@@ -309,6 +309,8 @@ public class CellFinderMapActivity extends MapActivity implements
 				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DD);
 			} else if (getString(R.string.pref_value_coord_fmt_ddms).equals(coordFmt)) {
 				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DDMS);
+			} else if (getString(R.string.pref_value_coord_fmt_mgrs).equals(coordFmt)) {
+				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_MGRS);
 			} else {
 				mLocationListener.setLocationFormat(MyLocationListener.LOCATION_FMT_DDM);
 			}

@@ -60,6 +60,7 @@
 	<string name="pref_value_coord_fmt_dd">DD.ddddd</string>
 	<string name="pref_value_coord_fmt_ddm">DD MM.mmm</string>
 	<string name="pref_value_coord_fmt_ddms">DD MM SS.ss</string>
+	<string name="pref_value_coord_fmt_mgrs">MGRS</string>
 
 	<string name="pref_title_location_refresh">Location Refresh"</string>
 	<string name="pref_value_location_refresh_0">0 seconds</string>
