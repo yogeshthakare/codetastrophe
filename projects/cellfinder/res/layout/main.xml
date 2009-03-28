@@ -97,11 +97,19 @@
 		</TableLayout>
 	</LinearLayout>
 	<!--  debug apikey -->
-	<view class="com.google.android.maps.MapView" android:id="@+id/map_view"
+	<RelativeLayout  android:layout_width="fill_parent" 
+    android:layout_height="fill_parent"> 
+	<com.google.android.maps.MapView
+		android:id="@+id/map_view"
 		android:layout_width="fill_parent" 
 		android:layout_height="fill_parent"
-		android:layout_weight="1" 
 		android:enabled="true" 
 		android:clickable="true"
 		android:apiKey="01xyOs8f3xXu0XQIAl9-cYRCuhnLJZtwWJ-x7xQ" />
+	 <LinearLayout android:id="@+id/layout_zoom" 
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentBottom="true" 
+    android:layout_centerHorizontal="true"   /> 	
+	</RelativeLayout>
 </LinearLayout>

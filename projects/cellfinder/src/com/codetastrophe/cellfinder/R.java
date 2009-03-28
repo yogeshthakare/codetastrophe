@@ -24,6 +24,7 @@ public final class R {
     public static final class id {
         public static final int cell_info_view=0x7f070002;
         public static final int full_view=0x7f070001;
+        public static final int layout_zoom=0x7f07000e;
         public static final int map_view=0x7f07000d;
         public static final int tv_about=0x7f070000;
         public static final int tv_cell_bearing=0x7f070007;

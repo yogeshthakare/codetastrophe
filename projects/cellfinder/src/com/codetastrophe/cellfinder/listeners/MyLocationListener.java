@@ -38,8 +38,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationProvider;
 import android.os.Bundle; //import android.util.Log;
-import android.view.Gravity;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -79,6 +77,8 @@ public class MyLocationListener implements LocationListener {
 	private boolean mCompass = false;
 	
 	private MyLocationOverlay mMyLocationOverlay;
+	private LinearLayout mZoomLayout = null;
+	private LinearLayout mZoom = null;
 
 	private static String[] mDirs = new String[] { "N", "NE", "E", "SE", "S",
 			"SW", "W", "NW", "N" };
@@ -88,6 +88,10 @@ public class MyLocationListener implements LocationListener {
 		mTvLocationCoarse = (TextView) a.findViewById(R.id.tv_location_coarse);
 		mTvLocationFine = (TextView) a.findViewById(R.id.tv_location_fine);
 		mMapView = (MapView) a.findViewById(R.id.map_view);
+		
+		mZoomLayout = (LinearLayout) a.findViewById(R.id.layout_zoom);
+		mZoom = (LinearLayout) mMapView.getZoomControls();
+		
 		mTvCellBearing = (TextView) a.findViewById(R.id.tv_cell_bearing);
 		mTvCellDirection = (TextView) a.findViewById(R.id.tv_cell_direction);
 		
@@ -228,19 +232,12 @@ public class MyLocationListener implements LocationListener {
 
 	public void setAutoZoom(boolean enabled) {
 		mAutoZoom = enabled;
-
-		// get zoom control and remove it
-		LinearLayout zc = (LinearLayout) mMapView.getZoomControls();
-		mMapView.removeView(zc);
-
+		mZoomLayout.removeView(mZoom);
+		
 		if (!mAutoZoom) {
 			// add zoom control back if auto-zoom is disabled
-			zc.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
-			LayoutParams zclayout = new LayoutParams(LayoutParams.FILL_PARENT,
-					LayoutParams.FILL_PARENT);
 
-			zc.setLayoutParams(zclayout);
-			mMapView.addView(zc);
+			mZoomLayout.addView(mZoom);
 		}
 
 		zoomAndCenterMap();
