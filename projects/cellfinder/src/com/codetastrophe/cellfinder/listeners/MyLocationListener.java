@@ -38,6 +38,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationProvider;
 import android.os.Bundle; //import android.util.Log;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -101,13 +102,18 @@ public class MyLocationListener implements LocationListener {
 		
 		mCoarseLocationOverlay = new ImageOverlay(a.getResources().getDrawable(
 				R.drawable.star_small), null);
-		mFineLocationOverlay = new ImageOverlay(a.getResources().getDrawable(
-				R.drawable.reticle), null);
 
-		Paint paint = new Paint();
-		paint.setStrokeWidth(3);
-		paint.setColor(Color.parseColor("#00B000"));
-		mLineOverlay = new LineOverlay(null, null, paint);
+		// only set up the fine location overlay and line overlay if the 
+		// gps is enabled
+		if(mFineLocationProvider != null) {
+			mFineLocationOverlay = new ImageOverlay(a.getResources().getDrawable(
+					R.drawable.reticle), null);
+
+			Paint paint = new Paint();
+			paint.setStrokeWidth(3);
+			paint.setColor(Color.parseColor("#00B000"));
+			mLineOverlay = new LineOverlay(null, null, paint);
+		}
 
 		mContext = a;
 
@@ -120,18 +126,28 @@ public class MyLocationListener implements LocationListener {
 
 		tmp = (TextView) a.findViewById(R.id.tv_location_fine_name);
 		if (tmp != null) {
-			tmp.setText(StyledResourceHelper.GetStyledString(mContext,
-					R.string.bold_fmt, mFineLocationProvider));
+			if(mFineLocationProvider != null) {
+				tmp.setText(StyledResourceHelper.GetStyledString(mContext,
+						R.string.bold_fmt, mFineLocationProvider));
+			} else {
+				// if we have no fine location provider, set the location
+				// text to disabled
+				tmp.setText(StyledResourceHelper.GetStyledString(mContext,
+						R.string.bold_fmt, a.getResources().getString(
+								R.string.provider_gps)));
+				
+				mTvLocationFine.setText(R.string.provider_disabled);
+			}
 		}
 
 		clearBearing();
 	}
 
 	public void onLocationChanged(Location location) {
-		// Log.d(CellFinderMapActivity.CELLFINDER, String.format(
-		// "MyLocationListener.onLocationChanged() - provider %s, lat %s, lon %s",
-		// location.getProvider(), location.getLatitude(),
-		// location.getLongitude()));
+		Log.d(CellFinderMapActivity.CELLFINDER, String.format(
+			"MyLocationListener.onLocationChanged() - provider %s, lat %s, lon %s",
+			location.getProvider(), location.getLatitude(),
+			location.getLongitude()));
 
 		// calculate geopoint for current location
 		Double lat = location.getLatitude() * 1E6;
@@ -140,8 +156,8 @@ public class MyLocationListener implements LocationListener {
 
 		String prov = location.getProvider();
 		if (prov.equals(mFineLocationProvider)) {
-			// Log.d(CellFinderMapActivity.CELLFINDER,
-			// "updating fine location");
+			Log.d(CellFinderMapActivity.CELLFINDER,
+					"updating fine location");
 			mFineLastLocation = location;
 
 			// update the location text
@@ -155,8 +171,8 @@ public class MyLocationListener implements LocationListener {
 				zoomAndCenterMap();
 			}
 		} else if (prov.equals(mCoarseLocationProvider)) {
-			// Log.d(CellFinderMapActivity.CELLFINDER,
-			// "updating coarse location");
+			Log.d(CellFinderMapActivity.CELLFINDER,
+					"updating coarse location");
 			mCoarseLastLocation = location;
 
 			// update the location text
@@ -195,8 +211,7 @@ public class MyLocationListener implements LocationListener {
 		switch (status) {
 		case LocationProvider.TEMPORARILY_UNAVAILABLE:
 			// if it's temporarily unavailable but we have the most recent
-			// location,
-			// italicize the previous one
+			// location, italicize the previous one
 			Location loc = getLastLocationForProvider(provider);
 			if (loc != null) {
 				tv.setText(StyledResourceHelper.GetStyledString(mContext,
@@ -236,7 +251,6 @@ public class MyLocationListener implements LocationListener {
 		
 		if (!mAutoZoom) {
 			// add zoom control back if auto-zoom is disabled
-
 			mZoomLayout.addView(mZoom);
 		}
 
@@ -422,14 +436,23 @@ public class MyLocationListener implements LocationListener {
 
 	private void UpdateOverlays() {
 		mCoarseLocationOverlay.setLocation(mCoarseLastGP);
-		mFineLocationOverlay.setLocation(mFineLastGP);
-		mLineOverlay.setPositions(mFineLastGP, mCoarseLastGP);
-
+		if(mFineLocationOverlay != null) {
+			mFineLocationOverlay.setLocation(mFineLastGP);
+			mLineOverlay.setPositions(mFineLastGP, mCoarseLastGP);
+		}
+		
+		// add overlays
 		List<Overlay> overlays = mMapView.getOverlays();
 		overlays.clear();
-		overlays.add(mLineOverlay);
+
+		// only add the line and the fine overlay if the fine location overlay
+		// exists
+		if(mFineLocationOverlay != null) {
+			overlays.add(mLineOverlay);
+			overlays.add(mFineLocationOverlay);
+		}
+		
 		overlays.add(mCoarseLocationOverlay);
-		overlays.add(mFineLocationOverlay);
 		
 		if(mMyLocationOverlay != null && mCompass) {
 			overlays.add(mMyLocationOverlay);
@@ -472,9 +495,15 @@ public class MyLocationListener implements LocationListener {
 		} else if(mFineLastGP != null) {
 			// if we only have the fine location, use that
 			mc.setCenter(mFineLastGP);
+			if(mAutoZoom) {
+				mc.setZoom(mMapView.getMaxZoomLevel() - 2);
+			}
 		} else if(mCoarseLastGP != null) {
 			// if we only have the coarse location, use that
 			mc.setCenter(mCoarseLastGP);
+			if(mAutoZoom) {
+				mc.setZoom(mMapView.getMaxZoomLevel() - 2);
+			}
 		}
 	}
 }

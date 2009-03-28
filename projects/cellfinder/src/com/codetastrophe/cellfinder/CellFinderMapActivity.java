@@ -321,8 +321,7 @@ public class CellFinderMapActivity extends MapActivity implements
 	private void setupListeners() {
 		// look for the 'network' location provider or something else that might
 		// be acceptable. if there are issues, error dialogs are generated. if
-		// null is
-		// returned, this app won't work so just return
+		// null is returned, this app won't work so just return
 		mCoarseLocationProvider = getLocationProvider(
 				getString(R.string.provider_network),
 				getString(R.string.provider_coarse), Criteria.ACCURACY_COARSE);
@@ -333,16 +332,11 @@ public class CellFinderMapActivity extends MapActivity implements
 			return;
 		}
 
-		// now look for the 'gps' location provider
+		// now look for the 'gps' location provider. if we don't have it, we'll
+		// just do without
 		mFineLocationProvider = getLocationProvider(
 				getString(R.string.provider_gps),
 				getString(R.string.provider_fine), Criteria.ACCURACY_FINE);
-
-		if (mFineLocationProvider == null) {
-			ErrorDialog.Show(this, getString(R.string.provider_fine_error),
-					errorFinishListener);
-			return;
-		}
 
 		// set up location listener and manager, but don't start anything yet
 		mLocationListener = new MyLocationListener(this);
