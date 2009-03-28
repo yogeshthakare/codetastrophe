@@ -1,0 +1,13 @@
+#summary CellFinder data logging
+
+= File format =
+
+If data saving is enabled in CellFinder, location data is stored on the SD card in the file `cellfinder.csv` in the root directory.
+
+This CSV (comma separated value) file is formatted as such:
+
+`Date/Time, Network Operator, MCC, MNC, Cell LAC, Cell CID, Signal Strength, GPS Latitude, GPS Longitude, Cell Latitude, Cell Longitude`
+
+Data is appended to the file each time the location changes (either the GPS location or cell location). The Date/Time is in a locale-specific format. Longitudes and latitudes are in degrees, and signal strength is in dBm.
+
+If you have your phone plugged into a computer and the SD card is mounted, the file can't be written to, so make sure you disconnect the phone from a PC before trying to use this feature.
