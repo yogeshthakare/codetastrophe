@@ -41,6 +41,8 @@ Version 1.1 was released on 12/21/2008 with these new features:
   * Show neighboring cells - I know that the hardware has this ability, but I don't know if it's possible to get at from a userland process. The Phone app holds the only handle to the RID service that can talk directly to the GSM chipset.
   * Storing data - this is a longer term project. It would be nice if CellFinder kept a database of all cell towers it has seen and had the ability to display them on a map
   * Ensure only cell tower location is retrieved - right now, it's possible for Google to send a location that is actually a WiFi AP. This needs fixed
+  * Integration with http://www.deadcellzones.com
+  * Integration with OpenCellID database (http://www.opencellid.org/)
 
 = Possible Bugs =
 
