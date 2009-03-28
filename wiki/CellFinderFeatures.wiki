@@ -12,6 +12,7 @@ These features have been checked into SVN but not available on the Android Marke
  * Allow panning with zoom buttons enabled (thanks Jesse Lockwood!)
  * Allow starting without GPS enabled
  * Option to show coordinates in MGRS (Military Grid Reference System) format (courtesy of IBM - http://www.ibm.com/developerworks/java/library/j-coordconvert/)
+ * Experimental data saving feature - log all location data to a file on the SD card. See CellFinderDataLogging
 
 == 1.2 ==
 
