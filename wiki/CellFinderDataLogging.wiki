@@ -1,4 +1,5 @@
 #summary CellFinder data logging
+#labels cellfinder
 
 = File format =
 
