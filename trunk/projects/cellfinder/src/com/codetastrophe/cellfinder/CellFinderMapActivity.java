@@ -241,6 +241,8 @@ public class CellFinderMapActivity extends MapActivity implements
 				getString(R.string.pref_title_coord_fmt), null);
 		boolean compass = mPreferences.getBoolean(
 				getString(R.string.pref_title_compass), false);
+		boolean saveData = mPreferences.getBoolean(
+				getString(R.string.pref_title_savedata), false);
 
 		// show or hide the cell info view
 		if (!showCellData) {
@@ -263,8 +265,7 @@ public class CellFinderMapActivity extends MapActivity implements
 					// if the refresh value changes, re-start the listeners
 					if (mLocationRefresh != newrefresh) {
 						mLocationRefresh = newrefresh;
-						onPause();
-						onResume();
+						restartListeners();
 					}
 				} catch (NumberFormatException e) {
 					// don't do anything
@@ -317,6 +318,7 @@ public class CellFinderMapActivity extends MapActivity implements
 			
 			// set compass
 			mLocationListener.setCompass(compass);
+			mLocationListener.setSaveData(saveData);
 		}
 	}
 
@@ -340,13 +342,13 @@ public class CellFinderMapActivity extends MapActivity implements
 				getString(R.string.provider_gps),
 				getString(R.string.provider_fine), Criteria.ACCURACY_FINE);
 
-		// set up location listener and manager, but don't start anything yet
-		mLocationListener = new MyLocationListener(this);
-
 		// get phone listener and telephony manager, but don't start
 		// anything yet
 		mPhoneStateListener = new MyPhoneStateListener(this);
 		mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		
+		// set up location listener and manager, but don't start anything yet
+		mLocationListener = new MyLocationListener(this, mPhoneStateListener);
 
 		// check to see if the phone is turned on. this listener
 		// checks for service and displays a dialog box if there are
@@ -430,5 +432,12 @@ public class CellFinderMapActivity extends MapActivity implements
 		if(mLocationListener != null) {
 			mLocationListener.resume();
 		}
+	}
+	
+	private void restartListeners() {
+		stopListeners();
+		setupListeners();
+		loadPreferences();
+		startListeners();
 	}
 }

@@ -35,6 +35,13 @@ public class MyPhoneStateListener extends PhoneStateListener {
 	private TextView mTvCellCidLac = null;
 	private Context mContext = null;
 
+	private String mOperStr = "";
+	private String mCidStr = "";
+	private String mLacStr = "";
+	private String mDbmStr = "";
+	private String mMccStr = "";
+	private String mMncStr = "";
+	
 	public MyPhoneStateListener(Activity a) {
 		// initialize our textviews
 		mTvOperText = (TextView) a.findViewById(R.id.tv_oper_text);
@@ -60,11 +67,11 @@ public class MyPhoneStateListener extends PhoneStateListener {
 			String unknown = mContext.getString(R.string.unknown);
 
 			// don't print a -1 in the UI, that's hella weak
-			String cidstr = cid == -1 ? unknown : Integer.toString(cid);
-			String lacstr = lac == -1 ? unknown : Integer.toString(lac);
+			mCidStr = cid == -1 ? unknown : Integer.toString(cid);
+			mLacStr = lac == -1 ? unknown : Integer.toString(lac);
 
 			mTvCellCidLac.setText(StyledResourceHelper.GetStyledString(
-					mContext, R.string.tvcellinfo_fmt, cidstr, lacstr));
+					mContext, R.string.tvcellinfo_fmt, mCidStr, mLacStr));
 		}
 	}
 
@@ -78,28 +85,32 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		switch (state) {
 		case ServiceState.STATE_IN_SERVICE:
 		case ServiceState.STATE_EMERGENCY_ONLY:
+			mOperStr = serviceState.getOperatorAlphaLong();
 			mTvOperText.setText(StyledResourceHelper.GetStyledString(mContext,
 					R.string.operinfo_fmt,
-					serviceState.getOperatorAlphaShort(), serviceState
-							.getOperatorAlphaLong()));
+					serviceState.getOperatorAlphaShort(), mOperStr));
+			
 
 			String op = serviceState.getOperatorNumeric();
+			mMccStr = op.substring(0, 3);
+			mMncStr = op.substring(3);
 			if (op.length() > 3) {
 				mTvOperNum.setText(StyledResourceHelper.GetStyledString(
-						mContext, R.string.opernum_fmt, op.substring(0, 3), op
-								.substring(3)));
+						mContext, R.string.opernum_fmt, mMccStr, mMncStr));
 			}
 
 			break;
 		case ServiceState.STATE_POWER_OFF:
 			clearTextViews();
-			mTvOperText.setText(mContext
-					.getString(R.string.service_state_poweroff));
+			mOperStr = mContext.getString(R.string.service_state_poweroff);
+			mTvOperText.setText(mOperStr);
 			break;
 		case ServiceState.STATE_OUT_OF_SERVICE:
 			clearTextViews();
-			mTvOperText.setText(mContext
-					.getString(R.string.service_state_noservice));
+			
+			mOperStr = mContext.getString(R.string.service_state_noservice);
+			mTvOperText.setText(mOperStr);
+			
 			break;
 		}
 	}
@@ -113,18 +124,18 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		// dBm calculation comes from PhoneStateIntentReceiver.java in the 
 		// Android source code
 
-		String dbmStr = "Unknown";
-		
 		if(asu != -1) {
-			if(asu == 0) dbmStr = "-113 or less";
-			else if (asu == 31) dbmStr = "-51 or greater";
+			if(asu == 0) mDbmStr = "-113 or less";
+			else if (asu == 31) mDbmStr = "-51 or greater";
 			else {
-				dbmStr = ((Integer)(-113 + 2*asu)).toString();
+				mDbmStr = ((Integer)(-113 + 2*asu)).toString();
 			}
+		} else {
+			mDbmStr = "Unknown";
 		}
 		
 		mTvSignalStr.setText(StyledResourceHelper.GetStyledString(mContext,
-				R.string.signal_fmt, asu, dbmStr));
+				R.string.signal_fmt, asu, mDbmStr));
 	}
 
 	private void clearTextViews() {
@@ -132,5 +143,29 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		mTvOperNum.setText("");
 		mTvCellCidLac.setText("");
 		mTvSignalStr.setText("");
+	}
+
+	public String getOperStr() {
+		return mOperStr;
+	}
+
+	public String getCidStr() {
+		return mCidStr;
+	}
+
+	public String getLacStr() {
+		return mLacStr;
+	}
+
+	public String getDbmStr() {
+		return mDbmStr;
+	}
+
+	public String getMccStr() {
+		return mMccStr;
+	}
+
+	public String getMncStr() {
+		return mMncStr;
 	}
 }

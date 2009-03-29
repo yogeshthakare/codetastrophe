@@ -56,6 +56,13 @@
 		android:title="@string/pref_title_satellite"
 		/>
 	<CheckBoxPreference
+		android:key="@string/pref_title_savedata"
+		android:defaultValue="true"
+		android:summaryOn="@string/pref_summary_savedata_on"
+		android:summaryOff="@string/pref_summary_savedata_off"
+		android:title="@string/pref_title_savedata"
+		/>
+	<CheckBoxPreference
 		android:key="@string/pref_title_show_cell_data"
 		android:defaultValue="true"
 		android:summaryOn="@string/pref_summary_show_cell_data_on"
