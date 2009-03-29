@@ -16,8 +16,14 @@
 
 package com.codetastrophe.cellfinder.listeners;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.codetastrophe.cellfinder.CellFinderMapActivity;
 import com.codetastrophe.cellfinder.R;
@@ -39,8 +45,9 @@ import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationProvider;
-import android.os.Bundle; //import android.util.Log;
-import android.util.Log;
+import android.os.Bundle; 
+import android.os.Environment;
+//import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -79,17 +86,24 @@ public class MyLocationListener implements LocationListener {
 	private int mUnits = 0;
 	private int mLocationFmt = 0;
 	private boolean mCompass = false;
+	private LatLon2MGRUTM mMgrsConversion;
+	private File mOutputFile = null;
+	private MyPhoneStateListener mPhoneStateListener;
+	private boolean mSaveData = false;
+	private String mSaveDataFile;
 	
 	private MyLocationOverlay mMyLocationOverlay;
 	private LinearLayout mZoomLayout = null;
 	private LinearLayout mZoom = null;
 	
-	private LatLon2MGRUTM mMgrsConversion;
 
 	private static String[] mDirs = new String[] { "N", "NE", "E", "SE", "S",
 			"SW", "W", "NW", "N" };
 
-	public MyLocationListener(Activity a) {
+	public MyLocationListener(Activity a, MyPhoneStateListener phoneStateListener) {
+		mContext = a;
+		mPhoneStateListener = phoneStateListener;
+		
 		// collect things we need from the activity
 		mTvLocationCoarse = (TextView) a.findViewById(R.id.tv_location_coarse);
 		mTvLocationFine = (TextView) a.findViewById(R.id.tv_location_fine);
@@ -120,8 +134,6 @@ public class MyLocationListener implements LocationListener {
 			mLineOverlay = new LineOverlay(null, null, paint);
 		}
 
-		mContext = a;
-
 		// set text labels for location providers
 		TextView tmp = (TextView) a.findViewById(R.id.tv_location_coarse_name);
 		if (tmp != null) {
@@ -146,15 +158,16 @@ public class MyLocationListener implements LocationListener {
 		}
 
 		mMgrsConversion = new CoordinateConversion().new LatLon2MGRUTM();
+		mSaveDataFile = getSaveDataFilename();
 		
 		clearBearing();
 	}
 
 	public void onLocationChanged(Location location) {
-		Log.d(CellFinderMapActivity.CELLFINDER, String.format(
-			"MyLocationListener.onLocationChanged() - provider %s, lat %s, lon %s",
-			location.getProvider(), location.getLatitude(),
-			location.getLongitude()));
+		//Log.d(CellFinderMapActivity.CELLFINDER, String.format(
+		//	"MyLocationListener.onLocationChanged() - provider %s, lat %s, lon %s",
+		//	location.getProvider(), location.getLatitude(),
+		//	location.getLongitude()));
 
 		// calculate geopoint for current location
 		Double lat = location.getLatitude() * 1E6;
@@ -163,8 +176,8 @@ public class MyLocationListener implements LocationListener {
 
 		String prov = location.getProvider();
 		if (prov.equals(mFineLocationProvider)) {
-			Log.d(CellFinderMapActivity.CELLFINDER,
-					"updating fine location");
+			//Log.d(CellFinderMapActivity.CELLFINDER,
+			//		"updating fine location");
 			mFineLastLocation = location;
 
 			// update the location text
@@ -178,8 +191,8 @@ public class MyLocationListener implements LocationListener {
 				zoomAndCenterMap();
 			}
 		} else if (prov.equals(mCoarseLocationProvider)) {
-			Log.d(CellFinderMapActivity.CELLFINDER,
-					"updating coarse location");
+			//Log.d(CellFinderMapActivity.CELLFINDER,
+			//		"updating coarse location");
 			mCoarseLastLocation = location;
 
 			// update the location text
@@ -193,7 +206,11 @@ public class MyLocationListener implements LocationListener {
 			}
 
 		}
-
+		
+		if(mSaveData) {
+			saveLocation();
+		}
+		
 		updateBearing();
 	}
 
@@ -520,5 +537,81 @@ public class MyLocationListener implements LocationListener {
 				mc.setZoom(mMapView.getMaxZoomLevel() - 2);
 			}
 		}
+	}
+	
+	private void saveLocation() {
+		if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+			FileWriter writer = null;
+			try {
+				if(mOutputFile == null) {
+					File sdcard = Environment.getExternalStorageDirectory();
+					mOutputFile = new File(sdcard, mSaveDataFile);
+				}
+
+				String gpslat = "";
+				String gpslon = "";
+				String towerlat = "";
+				String towerlon = "";
+				DecimalFormat df = new DecimalFormat(mContext.getString(R.string.deg_fmt));
+				
+				if(mFineLastLocation != null) {
+					gpslat = df.format(mFineLastLocation.getLatitude());
+					gpslon = df.format(mFineLastLocation.getLongitude());
+				}
+				
+				if(mCoarseLastLocation != null) {
+					towerlat = df.format(mCoarseLastLocation.getLatitude());
+					towerlon = df.format(mCoarseLastLocation.getLongitude());
+				}
+				
+				Date now = new Date();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				
+				writer = new FileWriter(mOutputFile, true);
+				String s = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+						sdf.format(now),
+						mPhoneStateListener.getOperStr(),
+						mPhoneStateListener.getMccStr(),
+						mPhoneStateListener.getMncStr(),
+						mPhoneStateListener.getLacStr(),
+						mPhoneStateListener.getCidStr(),
+						mPhoneStateListener.getDbmStr(),
+						gpslat, gpslon,
+						towerlat, towerlon);
+				
+				writer.write(s);
+			} catch (IOException ioe) {
+				
+			} finally {
+				if(writer != null) {
+					try {
+						writer.flush();
+						writer.close();
+					} catch (IOException ioe2) { }
+				}
+			}
+		}
+	}
+
+	public void setSaveData(boolean saveData) {
+		Activity a = (Activity)mContext;
+		if(saveData) {
+			a.setTitle(a.getString(R.string.app_name) + a.getString(R.string.saving_data));
+		} else {
+			a.setTitle(a.getString(R.string.app_name));
+		}
+		
+		mSaveData = saveData;
+	}
+	
+	private String getSaveDataFilename() {
+		SimpleDateFormat sdf = new SimpleDateFormat(
+				mContext.getString(R.string.datafile_datefmt));
+		
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+		
+		return String.format(mContext.getString(R.string.datafile_namefmt), 
+				sdf.format(new Date()));
 	}
 }
