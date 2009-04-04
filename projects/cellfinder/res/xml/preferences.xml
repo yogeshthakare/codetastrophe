@@ -13,8 +13,8 @@
 	<CheckBoxPreference
 		android:key="@string/pref_title_auto_zoom"
 		android:defaultValue="true"
-		android:summaryOn="@string/perf_summary_auto_zoom_on"
-		android:summaryOff="@string/perf_summary_auto_zoom_off"
+		android:summaryOn="@string/pref_summary_auto_zoom_on"
+		android:summaryOff="@string/pref_summary_auto_zoom_off"
 		android:title="@string/pref_title_auto_zoom"
 		/>
 	<CheckBoxPreference
@@ -31,6 +31,13 @@
 		android:entries="@array/pref_coord_fmt_options"
 		android:entryValues="@array/pref_coord_fmt_options"
 		android:dialogTitle="@string/pref_title_coord_fmt"
+		/>
+	<CheckBoxPreference
+		android:key="@string/pref_title_directquery"
+		android:defaultValue="false"
+		android:summaryOn="@string/pref_summary_directquery_on"
+		android:summaryOff="@string/pref_summary_directquery_off"
+		android:title="@string/pref_title_directquery"
 		/>
 	<ListPreference
 		android:key="@string/pref_title_dist_unit"
@@ -51,13 +58,13 @@
 	<CheckBoxPreference
 		android:key="@string/pref_title_satellite"
 		android:defaultValue="true"
-		android:summaryOn="@string/perf_summary_satellite_on"
-		android:summaryOff="@string/perf_summary_satellite_off"
+		android:summaryOn="@string/pref_summary_satellite_on"
+		android:summaryOff="@string/pref_summary_satellite_off"
 		android:title="@string/pref_title_satellite"
 		/>
 	<CheckBoxPreference
 		android:key="@string/pref_title_savedata"
-		android:defaultValue="true"
+		android:defaultValue="false"
 		android:summaryOn="@string/pref_summary_savedata_on"
 		android:summaryOff="@string/pref_summary_savedata_off"
 		android:title="@string/pref_title_savedata"

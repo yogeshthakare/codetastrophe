@@ -187,8 +187,7 @@ public class CellFinderMapActivity extends MapActivity implements
 
 	// try to get a requested location provider, but return an alternate enabled
 	// one if found. generates error and warning dialogs if there are issues.
-	// returns
-	// null if nothing is found.
+	// returns null if nothing is found.
 	private String getLocationProvider(String provRequested,
 			String accuracy_str, int accuracy_int) {
 
@@ -243,6 +242,8 @@ public class CellFinderMapActivity extends MapActivity implements
 				getString(R.string.pref_title_compass), false);
 		boolean saveData = mPreferences.getBoolean(
 				getString(R.string.pref_title_savedata), false);
+		boolean directQuery = mPreferences.getBoolean(
+				getString(R.string.pref_title_directquery), false);
 
 		// show or hide the cell info view
 		if (!showCellData) {
@@ -319,6 +320,10 @@ public class CellFinderMapActivity extends MapActivity implements
 			// set compass
 			mLocationListener.setCompass(compass);
 			mLocationListener.setSaveData(saveData);
+			
+			// set direct query mode
+			mLocationListener.setDirectQueryMode(directQuery);
+			mPhoneStateListener.setDirectQueryMode(directQuery);
 		}
 	}
 
@@ -349,6 +354,7 @@ public class CellFinderMapActivity extends MapActivity implements
 		
 		// set up location listener and manager, but don't start anything yet
 		mLocationListener = new MyLocationListener(this, mPhoneStateListener);
+		mPhoneStateListener.setLocationListener(mLocationListener);
 
 		// check to see if the phone is turned on. this listener
 		// checks for service and displays a dialog box if there are
