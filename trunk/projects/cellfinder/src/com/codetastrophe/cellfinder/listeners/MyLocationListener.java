@@ -71,6 +71,7 @@ public class MyLocationListener implements LocationListener {
 	private GeoPoint mFineLastGP = null;
 	private Location mCoarseLastLocation = null;
 	private Location mFineLastLocation = null;
+	private TextView mTvLocationCoarseName = null;
 	private TextView mTvLocationCoarse = null;
 	private TextView mTvLocationFine = null;
 	private MapView mMapView = null;
@@ -90,12 +91,13 @@ public class MyLocationListener implements LocationListener {
 	private File mOutputFile = null;
 	private MyPhoneStateListener mPhoneStateListener;
 	private boolean mSaveData = false;
-	private String mSaveDataFile;
+	private boolean mDirectQuery = false;
 	
 	private MyLocationOverlay mMyLocationOverlay;
 	private LinearLayout mZoomLayout = null;
 	private LinearLayout mZoom = null;
-	
+
+	private static String sSaveDataFile;
 
 	private static String[] mDirs = new String[] { "N", "NE", "E", "SE", "S",
 			"SW", "W", "NW", "N" };
@@ -103,8 +105,15 @@ public class MyLocationListener implements LocationListener {
 	public MyLocationListener(Activity a, MyPhoneStateListener phoneStateListener) {
 		mContext = a;
 		mPhoneStateListener = phoneStateListener;
+
+		CellFinderMapActivity cf = (CellFinderMapActivity) a;
+		mCoarseLocationProvider = cf.getCoarseLocationProvider();
+		mFineLocationProvider = cf.getFineLocationProvider();
 		
-		// collect things we need from the activity
+		mTvLocationCoarseName = (TextView) a.findViewById(R.id.tv_location_coarse_name);
+		mTvLocationCoarseName.setText(StyledResourceHelper.GetStyledString(mContext,
+				R.string.bold_fmt, mCoarseLocationProvider));
+		
 		mTvLocationCoarse = (TextView) a.findViewById(R.id.tv_location_coarse);
 		mTvLocationFine = (TextView) a.findViewById(R.id.tv_location_fine);
 		mMapView = (MapView) a.findViewById(R.id.map_view);
@@ -114,10 +123,6 @@ public class MyLocationListener implements LocationListener {
 		
 		mTvCellBearing = (TextView) a.findViewById(R.id.tv_cell_bearing);
 		mTvCellDirection = (TextView) a.findViewById(R.id.tv_cell_direction);
-		
-		CellFinderMapActivity cf = (CellFinderMapActivity) a;
-		mCoarseLocationProvider = cf.getCoarseLocationProvider();
-		mFineLocationProvider = cf.getFineLocationProvider();
 		
 		mCoarseLocationOverlay = new ImageOverlay(a.getResources().getDrawable(
 				R.drawable.star_small), null);
@@ -135,30 +140,21 @@ public class MyLocationListener implements LocationListener {
 		}
 
 		// set text labels for location providers
-		TextView tmp = (TextView) a.findViewById(R.id.tv_location_coarse_name);
-		if (tmp != null) {
+		TextView tmp = (TextView) a.findViewById(R.id.tv_location_fine_name);
+		if(mFineLocationProvider != null) {
 			tmp.setText(StyledResourceHelper.GetStyledString(mContext,
-					R.string.bold_fmt, mCoarseLocationProvider));
-		}
-
-		tmp = (TextView) a.findViewById(R.id.tv_location_fine_name);
-		if (tmp != null) {
-			if(mFineLocationProvider != null) {
-				tmp.setText(StyledResourceHelper.GetStyledString(mContext,
-						R.string.bold_fmt, mFineLocationProvider));
-			} else {
-				// if we have no fine location provider, set the location
-				// text to disabled
-				tmp.setText(StyledResourceHelper.GetStyledString(mContext,
-						R.string.bold_fmt, a.getResources().getString(
-								R.string.provider_gps)));
+					R.string.bold_fmt, mFineLocationProvider));
+		} else {
+			// if we have no fine location provider, set the location
+			// text to disabled
+			tmp.setText(StyledResourceHelper.GetStyledString(mContext,
+					R.string.bold_fmt, a.getResources().getString(
+							R.string.provider_gps)));
 				
-				mTvLocationFine.setText(R.string.provider_disabled);
-			}
+			mTvLocationFine.setText(R.string.provider_disabled);
 		}
 
 		mMgrsConversion = new CoordinateConversion().new LatLon2MGRUTM();
-		mSaveDataFile = getSaveDataFilename();
 		
 		clearBearing();
 	}
@@ -169,12 +165,9 @@ public class MyLocationListener implements LocationListener {
 		//	location.getProvider(), location.getLatitude(),
 		//	location.getLongitude()));
 
-		// calculate geopoint for current location
-		Double lat = location.getLatitude() * 1E6;
-		Double lon = location.getLongitude() * 1E6;
-		GeoPoint gp = new GeoPoint(lat.intValue(), lon.intValue());
-
+		GeoPoint gp = getGeoPoint(location);
 		String prov = location.getProvider();
+		
 		if (prov.equals(mFineLocationProvider)) {
 			//Log.d(CellFinderMapActivity.CELLFINDER,
 			//		"updating fine location");
@@ -190,12 +183,55 @@ public class MyLocationListener implements LocationListener {
 				UpdateOverlays();
 				zoomAndCenterMap();
 			}
-		} else if (prov.equals(mCoarseLocationProvider)) {
+			
+			updateBearing();
+		} else if(prov.equals(mCoarseLocationProvider)) {
 			//Log.d(CellFinderMapActivity.CELLFINDER,
 			//		"updating coarse location");
+			
+			// if we're using direct query, ignore the coarse location
+			if(!mDirectQuery) {
+				mCoarseLastLocation = location;
+
+				// update the location text
+				mTvLocationCoarseName.setText(StyledResourceHelper.GetStyledString(mContext,
+						R.string.bold_fmt, location.getProvider()));
+				mTvLocationCoarse.setText(getNiceLocation(location));
+
+				if (!gp.equals(mCoarseLastGP)) {
+					mCoarseLastGP = gp;
+
+					UpdateOverlays();
+					zoomAndCenterMap();
+				}
+				
+				updateBearing();
+			}
+		} 
+		
+		if(mSaveData) {
+			CellLocation celllocation = new CellLocation(
+					mPhoneStateListener.getOperStr(),
+					mPhoneStateListener.getMcc(),
+					mPhoneStateListener.getMnc(),
+					mPhoneStateListener.getLac(),
+					mPhoneStateListener.getCid(),
+					mPhoneStateListener.getDbm(),
+					location);
+			saveLocation(celllocation);
+		}
+	}
+	
+	public void directQueryLocationChanged(String oper, int mcc, int mnc, int lac, int cid, 
+			int signal, Location location) {
+		GeoPoint gp = getGeoPoint(location);
+		
+		if(mDirectQuery) {
 			mCoarseLastLocation = location;
 
 			// update the location text
+			mTvLocationCoarseName.setText(StyledResourceHelper.GetStyledString(mContext,
+					R.string.bold_fmt, location.getProvider()));
 			mTvLocationCoarse.setText(getNiceLocation(location));
 
 			if (!gp.equals(mCoarseLastGP)) {
@@ -205,15 +241,22 @@ public class MyLocationListener implements LocationListener {
 				zoomAndCenterMap();
 			}
 
+			updateBearing();
 		}
 		
 		if(mSaveData) {
-			saveLocation();
+			CellLocation celllocation = new CellLocation(
+					oper, mcc, mnc, lac, cid, signal, location);
+			saveLocation(celllocation);
 		}
-		
-		updateBearing();
 	}
-
+	
+	private GeoPoint getGeoPoint(Location location) {
+		Double lat = location.getLatitude() * 1E6;
+		Double lon = location.getLongitude() * 1E6;
+		return new GeoPoint(lat.intValue(), lon.intValue());
+	}
+	
 	public void onProviderDisabled(String provider) {
 		TextView tv = getTextViewForProvider(provider);
 		if (tv != null) {
@@ -539,47 +582,36 @@ public class MyLocationListener implements LocationListener {
 		}
 	}
 	
-	private void saveLocation() {
+	private synchronized void saveLocation(CellLocation location) {
 		if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
 			FileWriter writer = null;
 			try {
 				if(mOutputFile == null) {
 					File sdcard = Environment.getExternalStorageDirectory();
-					mOutputFile = new File(sdcard, mSaveDataFile);
+					mOutputFile = new File(sdcard, sSaveDataFile);
 				}
 
-				String gpslat = "";
-				String gpslon = "";
-				String towerlat = "";
-				String towerlon = "";
-				DecimalFormat df = new DecimalFormat(mContext.getString(R.string.deg_fmt));
-				
-				if(mFineLastLocation != null) {
-					gpslat = df.format(mFineLastLocation.getLatitude());
-					gpslon = df.format(mFineLastLocation.getLongitude());
-				}
-				
-				if(mCoarseLastLocation != null) {
-					towerlat = df.format(mCoarseLastLocation.getLatitude());
-					towerlon = df.format(mCoarseLastLocation.getLongitude());
-				}
-				
 				Date now = new Date();
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				SimpleDateFormat sdf = 
+					new SimpleDateFormat(mContext.getString(R.string.datafile_csv_datefmt));
 				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				
 				writer = new FileWriter(mOutputFile, true);
-				String s = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+
+				String s = String.format("%s,%s,%d,%d,%d,%d,%d,%s,%.6f,%.6f,%d,%d\n",
 						sdf.format(now),
-						mPhoneStateListener.getOperStr(),
-						mPhoneStateListener.getMccStr(),
-						mPhoneStateListener.getMncStr(),
-						mPhoneStateListener.getLacStr(),
-						mPhoneStateListener.getCidStr(),
-						mPhoneStateListener.getDbmStr(),
-						gpslat, gpslon,
-						towerlat, towerlon);
-				
+						location.Operator,
+						location.MCC,
+						location.MNC,
+						location.LAC,
+						location.CID,
+						location.Signal,
+						location.Location.getProvider(),
+						location.Location.getLatitude(), 
+						location.Location.getLongitude(),
+						((Double)location.Location.getAltitude()).intValue(),
+						((Float)location.Location.getAccuracy()).intValue());
+
 				writer.write(s);
 			} catch (IOException ioe) {
 				
@@ -598,8 +630,14 @@ public class MyLocationListener implements LocationListener {
 		Activity a = (Activity)mContext;
 		if(saveData) {
 			a.setTitle(a.getString(R.string.app_name) + a.getString(R.string.saving_data));
+			
+			// only create a new data file if the name has been null'd
+			if(sSaveDataFile == null) {
+				sSaveDataFile = getSaveDataFilename();
+			}
 		} else {
 			a.setTitle(a.getString(R.string.app_name));
+			sSaveDataFile = null;
 		}
 		
 		mSaveData = saveData;
@@ -613,5 +651,31 @@ public class MyLocationListener implements LocationListener {
 		
 		return String.format(mContext.getString(R.string.datafile_namefmt), 
 				sdf.format(new Date()));
+	}
+	
+	public void setDirectQueryMode(boolean directQuery) {
+		mDirectQuery = directQuery;
+	}
+	
+	public static class CellLocation {
+		public String Operator;
+		public int MCC;
+		public int MNC;
+		public int LAC;
+		public int CID;
+		public int Signal;
+		public Location Location;
+		
+		public CellLocation(String operator, int mcc, int mnc, int lac, 
+				int cid, int signal, Location location) {
+			
+			Operator = operator;
+			MCC = mcc;
+			MNC = mnc;
+			LAC = lac;
+			CID = cid;
+			Signal = signal;
+			Location = location;
+		}
 	}
 }

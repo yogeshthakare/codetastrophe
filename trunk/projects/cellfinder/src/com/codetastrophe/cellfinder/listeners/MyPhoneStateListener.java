@@ -16,31 +16,50 @@
 
 package com.codetastrophe.cellfinder.listeners;
 
+import java.util.Hashtable;
+
+import com.android.internal.location.protocol.GLocation;
+import com.codetastrophe.cellfinder.LocationFetcher;
 import com.codetastrophe.cellfinder.R;
+import com.codetastrophe.cellfinder.LocationFetcher.LocationCallback;
 import com.codetastrophe.cellfinder.utils.StyledResourceHelper;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.gsm.GsmCellLocation;
-//import android.util.Log;
+import android.util.Log;
 import android.widget.TextView;
 
 public class MyPhoneStateListener extends PhoneStateListener {
+	public static String LOCTYPE_CENTROID = "centroid";
+	public static String LOCTYPE_TOWER = "tower";
+	public static String LOCTYPE_UNKNOWN = "unknown";
+	
+	// the "waiting" location type means we made a request but are 
+	// still waiting on a response
+	public static String LOCTYPE_WAITING = "waiting";  
+	
 	private TextView mTvOperText = null;
 	private TextView mTvOperNum = null;
 	private TextView mTvSignalStr = null;
 	private TextView mTvCellCidLac = null;
 	private Context mContext = null;
+	private boolean mDirectQuery = false;
+	private LocationFetcher mLocationFetcher = null;
+	private LocationCache mLocationCache = null;
+	private Location mWaitingLocation = null;
+	private MyLocationListener mLocationListener = null;
 
 	private String mOperStr = "";
-	private String mCidStr = "";
-	private String mLacStr = "";
-	private String mDbmStr = "";
-	private String mMccStr = "";
-	private String mMncStr = "";
+	private int mCid = -1;
+	private int mLac = -1;
+	private int mDbm = -1;
+	private int mMcc = -1;
+	private int mMnc = -1;
 	
 	public MyPhoneStateListener(Activity a) {
 		// initialize our textviews
@@ -53,6 +72,10 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		mContext = a;
 	}
 
+	public void setLocationListener(MyLocationListener listener) {
+		mLocationListener = listener;
+	}
+	
 	@Override
 	public void onCellLocationChanged(CellLocation location) {
 		//Log.d(CellFinderMapActivity.CELLFINDER,
@@ -62,16 +85,101 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		if (location.getClass() == GsmCellLocation.class) {
 			GsmCellLocation gsmloc = (GsmCellLocation) location;
 
-			int cid = gsmloc.getCid();
-			int lac = gsmloc.getLac();
+			final int cid = mCid = gsmloc.getCid();
+			final int lac = mLac = gsmloc.getLac();
 			String unknown = mContext.getString(R.string.unknown);
 
 			// don't print a -1 in the UI, that's hella weak
-			mCidStr = cid == -1 ? unknown : Integer.toString(cid);
-			mLacStr = lac == -1 ? unknown : Integer.toString(lac);
+			String cidStr = cid == -1 ? unknown : Integer.toString(cid);
+			String lacStr = lac == -1 ? unknown : Integer.toString(lac);
 
 			mTvCellCidLac.setText(StyledResourceHelper.GetStyledString(
-					mContext, R.string.tvcellinfo_fmt, mCidStr, mLacStr));
+					mContext, R.string.tvcellinfo_fmt, cidStr, lacStr));
+			
+			// do direct query if it's enabled and we have enough info
+			if(mMcc != -1 && mMnc != -1 && cid != -1 && lac != -1 && mDirectQuery) {
+				if(mLocationFetcher == null) {
+					mLocationFetcher = new LocationFetcher(mContext);
+					mLocationCache = new LocationCache();
+					mWaitingLocation = new Location("waiting");
+				}
+				
+				try {
+					final int mcc = mMcc;
+					final int mnc = mMnc;
+				
+					final Location loc = mLocationCache.GetLocation(mcc, mnc, cid, lac);
+					if(loc == null) {
+						mLocationCache.SetLocation(mcc, mnc, cid, lac, mWaitingLocation);
+						
+						LocationCallback callback = new LocationCallback() {
+							@Override
+							public void Error(String msg) {
+								mLocationCache.SetLocation(mcc, mnc, cid, lac, null);
+								Log.d("LOCATION", "ERROR: " + msg);
+							}
+							
+							@Override
+							public void GotLocation(final int lac2, final int cid2, 
+									final int mcc2, final int mnc2, 
+									double lat, double lon, int alt, int acc, int locType) {
+
+								// get string for location type
+								String locstr;
+								if(locType == GLocation.LOCTYPE_CENTROID) {
+									locstr = LOCTYPE_CENTROID;
+								} else if (locType == GLocation.LOCTYPE_TOWER_LOCATION) {
+									locstr = LOCTYPE_TOWER;
+								} else {
+									locstr = LOCTYPE_UNKNOWN + locType;
+								}
+								
+								// use location type as 'provider' even though it sucks
+								// to do that
+								final Location newloc = new Location(locstr);
+								newloc.setLatitude(lat);
+								newloc.setLongitude(lon);
+								newloc.setAccuracy(acc);
+								newloc.setAltitude(alt);
+								
+								Log.d("LOCATION", String.format("storing location %d/%d/%d/%d from %s",
+									mcc2, mnc2, lac2, cid2, locType));
+								
+								mLocationCache.SetLocation(mcc2, mnc2, cid2, lac2, newloc);
+								
+								if(mLocationListener != null) {
+									// post a runnable on the UI thread - doesn't really
+									// matter which view object we pick
+									mTvOperText.post(new Runnable() {
+										@Override
+										public void run() {
+											mLocationListener.directQueryLocationChanged(
+													mOperStr, mcc2, mnc2, lac2, cid2,
+													mDbm, newloc);
+										}
+									});
+								}
+							}
+						};
+					
+						mLocationFetcher.getLocationFromCell(lac, cid, mcc, mnc, callback);
+					} else {
+						if(!loc.equals(mWaitingLocation)) {
+							if(mLocationListener != null) {
+								mTvOperText.post(new Runnable() {
+									@Override
+									public void run() {
+										mLocationListener.directQueryLocationChanged(mOperStr, 
+												mcc, mnc, lac, cid, mDbm, loc);
+									}
+								});
+							}
+						}
+					}
+				} catch (NumberFormatException nfe) {
+					
+				}
+			}
 		}
 	}
 
@@ -92,11 +200,20 @@ public class MyPhoneStateListener extends PhoneStateListener {
 			
 
 			String op = serviceState.getOperatorNumeric();
-			mMccStr = op.substring(0, 3);
-			mMncStr = op.substring(3);
+			
 			if (op.length() > 3) {
+				String mccStr = op.substring(0, 3);
+				String mncStr = op.substring(3);
+				
+				try {
+					mMcc = Integer.parseInt(mccStr);
+					mMnc = Integer.parseInt(mncStr);
+				} catch (Exception e) { }
+				
 				mTvOperNum.setText(StyledResourceHelper.GetStyledString(
-						mContext, R.string.opernum_fmt, mMccStr, mMncStr));
+						mContext, R.string.opernum_fmt, mccStr, mncStr));
+			} else {
+				mTvOperNum.setText(op);
 			}
 
 			break;
@@ -123,19 +240,20 @@ public class MyPhoneStateListener extends PhoneStateListener {
 
 		// dBm calculation comes from PhoneStateIntentReceiver.java in the 
 		// Android source code
-
+		String dbmStr = "Unknown";
+		
 		if(asu != -1) {
-			if(asu == 0) mDbmStr = "-113 or less";
-			else if (asu == 31) mDbmStr = "-51 or greater";
+			mDbm = ((Integer)(-113 + 2*asu));
+			
+			if(mDbm == -113) dbmStr = "-113 or less";
+			else if (mDbm >= -51) dbmStr = "-51 or greater";
 			else {
-				mDbmStr = ((Integer)(-113 + 2*asu)).toString();
+				dbmStr = Integer.toString(mDbm);
 			}
-		} else {
-			mDbmStr = "Unknown";
 		}
 		
 		mTvSignalStr.setText(StyledResourceHelper.GetStyledString(mContext,
-				R.string.signal_fmt, asu, mDbmStr));
+				R.string.signal_fmt, asu, dbmStr));
 	}
 
 	private void clearTextViews() {
@@ -149,23 +267,58 @@ public class MyPhoneStateListener extends PhoneStateListener {
 		return mOperStr;
 	}
 
-	public String getCidStr() {
-		return mCidStr;
+	public int getCid() {
+		return mCid;
 	}
 
-	public String getLacStr() {
-		return mLacStr;
+	public int getLac() {
+		return mLac;
 	}
 
-	public String getDbmStr() {
-		return mDbmStr;
+	public int getDbm() {
+		return mDbm;
 	}
 
-	public String getMccStr() {
-		return mMccStr;
+	public int getMcc() {
+		return mMcc;
 	}
 
-	public String getMncStr() {
-		return mMncStr;
+	public int getMnc() {
+		return mMnc;
+	}
+	
+	public void setDirectQueryMode(boolean directQuery) {
+		mDirectQuery = directQuery;
+	}
+	
+	public Location getCurrentLocationDirect() {
+		if(mLocationCache != null) {
+			return mLocationCache.GetLocation(mMcc, mMnc, mCid, mLac);
+		} else {
+			return null;
+		}
+	}
+	
+	private static class LocationCache {
+		private Hashtable<String, Location> _hash = new Hashtable<String, Location>();
+		
+		public LocationCache() { }
+		
+		public Location GetLocation(int mcc, int mnc, int cid, int lac) {
+			String key = getKey(mcc, mnc, cid, lac);
+			if(_hash.containsKey(key)) {
+				return _hash.get(key);
+			} else {
+				return null;
+			}
+		}
+		
+		public void SetLocation(int mcc, int mnc, int cid, int lac, Location location) {
+			_hash.put(getKey(mcc, mnc, cid, lac), location);
+		}
+		
+		private static String getKey(int mcc, int mnc, int cid, int lac) {
+			return String.format("%d:%d:%d:%d", mcc, mnc, cid, lac);
+		}
 	}
 }
