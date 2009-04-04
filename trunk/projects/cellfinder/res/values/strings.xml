@@ -18,7 +18,7 @@
     <string name="unknown">Unknown</string>
     <string name="tvlocation_coarse_fmt">&lt;b&gt;Network Location:&lt;/b&gt; %s</string>
     <string name="tvlocation_fine_fmt">&lt;b&gt;GPS Location:&lt;/b&gt; %s</string>
-    <string name="tvcellinfo_fmt">&lt;b&gt;Cell CID:&lt;/b&gt; %s, &lt;b&gt;Cell LAC:&lt;/b&gt; %s</string>
+    <string name="tvcellinfo_fmt">&lt;b&gt;Cell CID:&lt;/b&gt; %s (%s), &lt;b&gt;Cell LAC:&lt;/b&gt; %s</string>
     <string name="operinfo_fmt">&lt;b&gt;Operator name:&lt;/b&gt; %s / %s</string>
     <string name="opernum_fmt">&lt;b&gt;MCC:&lt;/b&gt; %s, &lt;b&gt;MNC:&lt;/b&gt; %s</string>
     <string name="bearing_fmt">&lt;b&gt;Direction:&lt;/b&gt; %s (%03d°)</string> 

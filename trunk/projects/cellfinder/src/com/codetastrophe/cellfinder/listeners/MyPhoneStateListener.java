@@ -92,9 +92,13 @@ public class MyPhoneStateListener extends PhoneStateListener {
 			// don't print a -1 in the UI, that's hella weak
 			String cidStr = cid == -1 ? unknown : Integer.toString(cid);
 			String lacStr = lac == -1 ? unknown : Integer.toString(lac);
+			
+			// get short cid - lower 16 bits
+			int shortcid = cid & 0xffff;
+			String shortCidStr = cid == -1 ? unknown : Integer.toString(shortcid);
 
 			mTvCellCidLac.setText(StyledResourceHelper.GetStyledString(
-					mContext, R.string.tvcellinfo_fmt, cidStr, lacStr));
+					mContext, R.string.tvcellinfo_fmt, cidStr, shortCidStr, lacStr));
 			
 			// do direct query if it's enabled and we have enough info
 			if(mMcc != -1 && mMnc != -1 && cid != -1 && lac != -1 && mDirectQuery) {
