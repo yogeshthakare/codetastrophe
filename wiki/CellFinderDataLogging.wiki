@@ -7,8 +7,29 @@ If data saving is enabled in CellFinder, location data is stored on the SD card 
 
 This CSV (comma separated value) file is formatted as such:
 
-`Date/Time, Network Operator, MCC, MNC, Cell LAC, Cell CID, Signal Strength, GPS Latitude, GPS Longitude, Cell Latitude, Cell Longitude`
+`Date, Network Operator, MCC, MNC, Cell LAC, Cell CID, Signal Strength, Location Provider, Latitude, Longitude, Altitude, Accuracy`
 
-Data is appended to the file each time the location changes (either the GPS location or cell location). The Date/Time is in a locale-specific format. Longitudes and latitudes are in degrees, and signal strength is in dBm.
+Data is appended to the file each time the location changes (either the GPS location or cell location). 
 
 If you have your phone plugged into a computer and the SD card is mounted, the file can't be written to, so make sure you disconnect the phone from a PC before trying to use this feature.
+
+= Column descriptions = 
+
+Here's a brief description of each column:
+
+  * *Date* - the date/time UTC in ISO 8601
+  * *Network Operator* - the mobile carrier the phone is using
+  * *MCC* - Mobile Country Code
+  * *MNC* - Mobile Network Code
+  * *Cell LAC* - Location Area Code
+  * *Cell CID* - Cell ID
+  * *Signal Strength* - signal strength in dBM
+  * *Location Provider* - one of these:
+    * gps - from the GPS (fine) location provider
+    * network - from the Network (coarse) location provider
+    * centroid - a centroid location from Google's location service
+    * tower - a tower location from Google's location service
+  * *Latitude* - latitude in degrees
+  * *Longitude* - longitude in degrees
+  * *Altitude* - altitude in meters (if available with the listed provider)
+  * *Accuracy* - accuracy in meters (if available with the listed provider)
