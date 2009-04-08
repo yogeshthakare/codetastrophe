@@ -9,7 +9,7 @@ It works by using both of the available location services - *coarse* (network-ba
 
 The cell tower location actually comes from Google - there is a web service that the location API in Android will query with the CID and LAC of the tower you're connected to and the service will respond with the latitude and longitude. 
 
-Google is constantly updating the location data returned for the network-based location service. *Since CellFinder was first written, Google no longer returns the location of the cell towers in my area! [CellFinderDirectMode direct query mode] was implemented to work around this, but even that won't return the correct tower locations.* So your mileage may very - some people report that CellFinder still works for them, others say it doesn't.
+Google is constantly updating the location data returned for the network-based location service. *Since CellFinder was first written, Google no longer returns the location of the cell towers in my area! [CellFinderDirectMode Direct query mode] was implemented to work around this, but even that won't return the correct tower locations.* So your mileage may very - some people report that CellFinder still works for them, others say it doesn't.
 
 For a comprehensive list of features, feature requests, and bugs, see CellFinderFeatures.
 
