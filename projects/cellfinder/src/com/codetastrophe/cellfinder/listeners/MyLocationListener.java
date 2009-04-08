@@ -568,14 +568,23 @@ public class MyLocationListener implements LocationListener {
 				mc.setCenter(new GeoPoint(latcen, loncen));
 			}
 		} else if(mFineLastGP != null) {
-			// if we only have the fine location, use that
-			mc.setCenter(mFineLastGP);
+			// auto center on gps if that's enabled
+			if(mAutoCenter != AUTO_CENTER_NONE) {
+				mc.setCenter(mFineLastGP);
+			}
+
+			// set zoom level to something reasonable - autozoom is designed
+			// for when there's 2 points, doesn't really matter when there's
+			// only one point
 			if(mAutoZoom) {
 				mc.setZoom(mMapView.getMaxZoomLevel() - 2);
 			}
 		} else if(mCoarseLastGP != null) {
-			// if we only have the coarse location, use that
-			mc.setCenter(mCoarseLastGP);
+			// auto center on network if that's enabled
+			if(mAutoCenter != AUTO_CENTER_NONE) {
+				mc.setCenter(mCoarseLastGP);
+			}
+			
 			if(mAutoZoom) {
 				mc.setZoom(mMapView.getMaxZoomLevel() - 2);
 			}
