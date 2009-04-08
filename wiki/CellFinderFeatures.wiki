@@ -3,7 +3,7 @@
 
 = Existing Features =
 
-These are the features that are currently in CellFinder on the Android Market. The current version is 1.2.
+These are the features that are currently in CellFinder on the Android Market. The current version is 1.3.
 
 == 1.3 == 
 
