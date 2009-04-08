@@ -7,10 +7,11 @@ These are the features that are currently in CellFinder on the Android Market. T
 
 == 1.3 == 
 
-These features have been checked into SVN but not available on the Android Market yet.
+Version 1.3 was released on Apr 4, 2009 with a bunch of updates:
 
  * Allow panning with zoom buttons enabled (thanks Jesse Lockwood!)
  * Allow starting without GPS enabled
+ * Show Cell ID in two formats - long and short
  * Option to show coordinates in MGRS (Military Grid Reference System) format (courtesy of IBM - http://www.ibm.com/developerworks/java/library/j-coordconvert/)
  * Experimental data saving feature - log all location data to a file on the SD card. See CellFinderDataLogging
  * Experimental Direct Mode option - see CellFinderDirectMode
@@ -21,7 +22,7 @@ Version 1.2 was released a few hours after 1.1 because of a major crashing bug. 
 
 == 1.1 ==
 
-Version 1.1 was released on 12/21/2008 with these new features:
+Version 1.1 was released on Dec 21, 2008 with these new features:
 
   * Signal strength in dBm
   * Show location with only one location source - so if no GPS signal is available, CellFinder will still show cell tower location
@@ -30,6 +31,9 @@ Version 1.1 was released on 12/21/2008 with these new features:
   * About box shows application version in title
 
 == 1.0 ==
+
+Version 1.0 was the first version of CellFinder, released on Dec 10, 2008.
+
   * Auto Center Map - can center on midpoint, the GPS location, the network location, or can be disabled for panning around manually
   * Auto Zoom - will automatically try to fit both locations on the map at the same time
   * Distance units - configurable to be either miles, feet, or meters
